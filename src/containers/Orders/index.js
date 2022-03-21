@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { Row, Col, Button, Tabs, Input, message, Spin, Tag } from 'antd';
+import { Row, Col, Button, Tabs, Input, message, Spin, Tag, notification, Progress, DatePicker } from 'antd';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
 import {
@@ -14,15 +14,69 @@ import {
   handleModifyOrderModalShowAction,
   modifyOrdersAction,
   trackOrdersAction,
+  onChangeMAWBAction,
+  onChangeContainerNumberAction,
+  onChangeTrackingNumberAction,
+  onChangeShipperAction,
+  onChangeShipperPhoneNumberAction,
+  onChangeShipperAddressAction,
+  onChangeDestinationCountryAction,
+  onChangeRecipientAction,
+  onChangeRUTAction,
+  onChangeRecipientPhoneNumberAction,
+  onChangeRecipientEmailAction,
+  onChangeRegionAction,
+  onChangeProvinceAction,
+  onChangeComunaAction,
+  onChangeAddressAction,
+  onChangeWeightAction,
+  onChangeValueAction,
+  onChangeDescriptionAction,
+  onChangeQuantityAction,
+  addOrdersAction,
+  addOrderListAction,
+  onChangeAddOrderSuccessNumberAction,
+  onChangeAddOrderFailNumberAction,
+  onChangeAddOrderStatusAction,
+  getOrdersByUpdatedAtAction,
 } from './orders.actions';
+
+import {
+  makeSelectMAWB,
+  makeSelectContainerNumber,
+  makeSelectTrackingNumber,
+  makeSelectShipper,
+  makeSelectShipperAddress,
+  makeSelectShipperPhoneNumber,
+  makeSelectDestinationCountry,
+  makeSelectRecipient,
+  makeSelectRecipientEmail,
+  makeSelectRecipientPhoneNumber,
+  makeSelectRUT,
+  makeSelectRegion,
+  makeSelectProvince,
+  makeSelectComuna,
+  makeSelectAddress,
+  makeSelectWeight,
+  makeSelectValue,
+  makeSelectDescription,
+  makeSelectQuantity,
+} from './orders.selectors';
+
 import reducer from './orders.reducer';
 import saga from './orders.saga';
 import { makeSelectUser } from 'global.selectors';
-import { selectTrackOrder } from './orders.selectors';
+import {
+  selectAddOrderState,
+  selectTrackOrder,
+  selectAddOrderSuccessNumber,
+  selectAddOrderFailNumber,
+} from './orders.selectors';
 import AddOrderModal from './AddOrderModal';
 import ModifyOrderModal from './ModifyOrderModal';
 import OrdersTable from './OrdersTable';
-import UploadFileModal from './UploadFileModal';
+import UploadStandardTemplateModal from './UploadStandardTemplateModal';
+import UploadSimpleTemplateModal from './UploadSimpleTemplateModal';
 import { Loader, LoaderOptions } from 'google-maps';
 import { getZonesAction } from 'containers/Zones/zones.actions';
 import { selectZonesList } from 'containers/Zones/zones.selectors';
@@ -38,11 +92,16 @@ function Orders(props) {
   const [destinationAddress, setDestinationAddress] = React.useState('');
   const [modifyingId, setModifyingId] = React.useState(0);
   const [files, setFiles] = React.useState([]);
+  const [uploadingDataList, setUploadingDataList] = React.useState([]);
   const googleRef = React.useRef();
   const [zoneResult, setZoneResult] = React.useState();
   const [inputTrackingNumber, setInputTrackingNumber] = React.useState('');
   const [searching, setSearching] = React.useState(false);
+  const [uploadedFailed, setUploadedFailed] = React.useState(0);
+  const [uploadedSuccessful, setUploadedSuccessful] = React.useState(0);
   const [uploadingPercent, setUploadingPercent] = React.useState(100);
+  const [datePicker, setDatePicker] = React.useState('');
+
   let service;
 
   useEffect(() => {
@@ -109,6 +168,10 @@ function Orders(props) {
     });
   }
 
+  function onDatePickerChange(date, dateString) {
+    setDatePicker(dateString);
+  }
+
   function isInPolygon(checkPoint, polygonPoints) {
     let counter = 0;
     let i;
@@ -139,6 +202,41 @@ function Orders(props) {
     }
   }
 
+  const openNotificationWithIcon = type => {
+    const key = 'updatedNotification';
+    notification.close(key);
+    const result = type !== 'success' ? 'Failed' : 'Successful';
+    notification[type]({
+      message: `Add Order ${result}`,
+      key,
+    });
+  };
+
+  const onOrderDataUpload = async () => {
+    if (uploadingDataList.length !== 0) {
+      await props.addOrderList({ payload: uploadingDataList });
+    }
+  };
+
+  const onUploadResult = async () => {
+    if (props.addOrderState) {
+      await setUploadedSuccessful(uploadedSuccessful + 1);
+      await openNotificationWithIcon('success');
+    } else if (props.addOrderState === false) {
+      await setUploadedFailed(uploadedFailed + 1);
+      await openNotificationWithIcon('error');
+    }
+  };
+
+  useEffect(() => {
+    console.log('search order updatedAt', datePicker);
+    if (datePicker !== '') {
+      props.getOrdersByUpdatedAt(datePicker);
+    } else {
+      props.getOrders();
+    }
+  }, [datePicker]);
+
   useEffect(() => {
     console.log('track', props.trackOrder);
     const record = props.trackOrder;
@@ -155,6 +253,29 @@ function Orders(props) {
   useEffect(() => {
     getCoordinate(destinationAddress);
   }, [destinationAddress]);
+
+  useEffect(() => {
+    onUploadResult(props.addOrderState);
+  }, [props.addOrderState]);
+
+  useEffect(() => {
+    if (uploadingDataList.length !== 0) {
+      setUploadingPercent(((props.addOrderSuccessNumber + props.addOrderFailNumber) / uploadingDataList.length) * 100);
+      if (props.addOrderSuccessNumber + props.addOrderFailNumber === uploadingDataList.length) {
+        document.getElementById('xlsxSimpleInput').value = '';
+        document.getElementById('xlsxStandardInput').value = '';
+        if (props.addOrderFailNumber) {
+          onUploadResult(false);
+        }
+      }
+    }
+  }, [props.addOrderFailNumber, props.addOrderSuccessNumber, uploadingDataList]);
+
+  useEffect(() => {
+    props.onChangeAddOrderFailNumber(0);
+    props.onChangeAddOrderSuccessNumber(0);
+    props.onChangeAddOrderStatus(undefined);
+  }, [uploadingDataList]);
 
   return (
     <>
@@ -213,8 +334,15 @@ function Orders(props) {
             </Col>
           </Row>
         </TabPane>
-        <TabPane tab="Order Data" key="2">
-          <Row style={{ width: '85vw', overflowX: 'scroll' }}>
+        <TabPane tab="Orders Data" key="2">
+          <Row style={{ marginTop: '20px', marginBottom: '20px' }}>
+            <Col span={4}> Search by Update Date:</Col>
+            <Col span={6}>
+              <DatePicker onChange={onDatePickerChange} format={'DD-MM-YYYY'} />
+            </Col>
+          </Row>
+
+          <Row style={{ width: '100%', overflowX: 'scroll' }}>
             <Col span={24}>
               <OrdersTable
                 onModifyOrder={props.handleModifyOrderModalShow}
@@ -223,20 +351,73 @@ function Orders(props) {
               />
             </Col>
           </Row>
+        </TabPane>
+        <TabPane tab="Orders Input" key="3">
           <AddOrderModal />
-          <ModifyOrderModal modifyingId={modifyingId} />
           <div style={{ marginBottom: 16 }}>
             <Button type="primary" onClick={props.handleAddOrderModalShow}>
               Add
             </Button>
           </div>
-          <UploadFileModal setFiles={setFiles} setUploadingPercent={setUploadingPercent} />
-          <Row>
-            <Col span={24}>
-              <input type="file" id="xlsxInput" accept=".xlsx" multiple={false} />
-              {uploadingPercent === 100 ? <React.Fragment /> : <Tag>Uploading</Tag>}
-              {/* {uploadingPercent === 100 ? <React.Fragment /> : <Progress percent={uploadingPercent} status="active" />} */}
+          <UploadStandardTemplateModal
+            setFiles={setFiles}
+            setUploadingPercent={setUploadingPercent}
+            setUploadingDataList={setUploadingDataList}
+          />
+          <Row style={{ marginTop: '30px' }}>
+            <Col span={3}>Standard Template</Col>
+            <Col span={21}>
+              <input type="file" id="xlsxStandardInput" accept=".xlsx" multiple={false} />
             </Col>
+          </Row>
+          <UploadSimpleTemplateModal
+            setFiles={setFiles}
+            setUploadingPercent={setUploadingPercent}
+            setUploadingDataList={setUploadingDataList}
+          />
+          <Row style={{ marginTop: '30px' }}>
+            <Col span={3}>Simple Template</Col>
+            <Col span={21}>
+              <input type="file" id="xlsxSimpleInput" accept=".xlsx" multiple={false} />
+            </Col>
+          </Row>
+          <Row style={{ marginTop: '60px' }}>
+            <Col span={4}>
+              {uploadingPercent === 100 ? (
+                <React.Fragment />
+              ) : uploadingPercent === 0 ? (
+                <Tag>Waiting for upload</Tag>
+              ) : (
+                <Tag>Uploading</Tag>
+              )}
+            </Col>
+            <Col span={20}>
+              {uploadingPercent === 100 ? (
+                <React.Fragment />
+              ) : uploadingPercent === 0 ? (
+                <React.Fragment />
+              ) : (
+                <Progress percent={uploadingPercent} status="active" />
+              )}
+            </Col>
+          </Row>
+          <Row style={{ marginTop: '30px', display: uploadingDataList.length === 0 ? 'none' : 'flex' }}>
+            <Col span={3}></Col>
+            <Col span={6} style={{ fontSize: '20px' }}>
+              Data Loaded: {uploadingDataList.length}
+            </Col>
+            <Col span={5}>
+              <Button
+                onClick={async () => await onOrderDataUpload()}
+                disabled={
+                  uploadingPercent < 100 && uploadingPercent >= 0 && uploadingDataList.length !== 0 ? false : true
+                }
+              >
+                Upload
+              </Button>
+            </Col>
+            <Col span={5}>Upload Successful: {props.addOrderSuccessNumber}</Col>
+            <Col span={5}>Upload Failed: {props.addOrderFailNumber}</Col>
           </Row>
         </TabPane>
       </Tabs>
@@ -251,22 +432,112 @@ Orders.propTypes = {
   handleModifyOrderModalShow: PropTypes.func,
   delOrders: PropTypes.func,
   trackOrder: PropTypes.object,
+  addOrderState: PropTypes.bool || null,
+
+  MAWB: PropTypes.string,
+  containerNumber: PropTypes.string,
+  trackingNumber: PropTypes.string,
+  shipper: PropTypes.string,
+  shipperPhoneNumber: PropTypes.string,
+  shipperAddress: PropTypes.string,
+  destinationCountry: PropTypes.string,
+  recipient: PropTypes.string,
+  recipientPhoneNumber: PropTypes.string,
+  recipientEmail: PropTypes.string,
+  RUT: PropTypes.string,
+  region: PropTypes.string,
+  province: PropTypes.string,
+  comuna: PropTypes.string,
+  address: PropTypes.string,
+  weight: PropTypes.number,
+  value: PropTypes.number,
+  description: PropTypes.string,
+  quantity: PropTypes.number,
+  addOrders: PropTypes.func,
+  handleAddModalCancel: PropTypes.func,
+  onChangeMAWB: PropTypes.func,
+  onChangeContainerNumber: PropTypes.func,
+  onChangeTrackingNumber: PropTypes.func,
+  onChangeShipper: PropTypes.func,
+  onChangeShipperPhoneNumber: PropTypes.func,
+  onChangeShipperAddress: PropTypes.func,
+  onChangeDestinationCountry: PropTypes.func,
+  onChangeRecipient: PropTypes.func,
+  onChangeRUT: PropTypes.func,
+  onChangeRecipientEmail: PropTypes.func,
+  onChangeRecipientPhoneNumber: PropTypes.func,
+  onChangeRegion: PropTypes.func,
+  onChangeProvince: PropTypes.func,
+  onChangeComuna: PropTypes.func,
+  onChangeAddress: PropTypes.func,
+  onChangeWeight: PropTypes.func,
+  onChangeValue: PropTypes.func,
+  onChangeDescription: PropTypes.func,
+  onChangeQuantity: PropTypes.func,
 };
 
 const mapStateToProps = createStructuredSelector({
   user: makeSelectUser(),
   trackOrder: selectTrackOrder,
   zonesList: selectZonesList,
+  addOrderState: selectAddOrderState,
+  addOrderFailNumber: selectAddOrderFailNumber,
+  addOrderSuccessNumber: selectAddOrderSuccessNumber,
+  MAWB: makeSelectMAWB,
+  containerNumber: makeSelectContainerNumber,
+  trackingNumber: makeSelectTrackingNumber,
+  shipper: makeSelectShipper,
+  shipperPhoneNumber: makeSelectShipperPhoneNumber,
+  shipperAddress: makeSelectShipperAddress,
+  destinationCountry: makeSelectDestinationCountry,
+  recipient: makeSelectRecipient,
+  RUT: makeSelectRUT,
+  recipientPhoneNumber: makeSelectRecipientPhoneNumber,
+  recipientEmail: makeSelectRecipientEmail,
+  region: makeSelectRegion,
+  province: makeSelectProvince,
+  comuna: makeSelectComuna,
+  address: makeSelectAddress,
+  value: makeSelectValue,
+  description: makeSelectDescription,
+  quantity: makeSelectQuantity,
+  weight: makeSelectWeight,
 });
 
 const mapDispatchToProps = dispatch => ({
   getZones: () => dispatch(getZonesAction()),
   getOrders: () => dispatch(getOrdersAction()),
+  getOrdersByUpdatedAt: date => dispatch(getOrdersByUpdatedAtAction(date)),
   getTrackOrder: trackingNumber => dispatch(trackOrdersAction(trackingNumber)),
   delOrders: id => dispatch(delOrdersAction(id)),
   handleAddOrderModalShow: () => dispatch(handleAddOrderModalShowAction()),
   handleModifyOrderModalShow: () => dispatch(handleModifyOrderModalShowAction()),
   modifyOrders: id => dispatch(modifyOrdersAction(id)),
+
+  addOrders: () => dispatch(addOrdersAction()),
+  addOrderList: list => dispatch(addOrderListAction(list)),
+  onChangeMAWB: e => dispatch(onChangeMAWBAction(e)),
+  onChangeContainerNumber: e => dispatch(onChangeContainerNumberAction(e)),
+  onChangeTrackingNumber: e => dispatch(onChangeTrackingNumberAction(e)),
+  onChangeShipper: e => dispatch(onChangeShipperAction(e)),
+  onChangeShipperPhoneNumber: e => dispatch(onChangeShipperPhoneNumberAction(e)),
+  onChangeShipperAddress: e => dispatch(onChangeShipperAddressAction(e)),
+  onChangeDestinationCountry: e => dispatch(onChangeDestinationCountryAction(e)),
+  onChangeRecipient: e => dispatch(onChangeRecipientAction(e)),
+  onChangeRUT: e => dispatch(onChangeRUTAction(e)),
+  onChangeRecipientEmail: e => dispatch(onChangeRecipientEmailAction(e)),
+  onChangeRecipientPhoneNumber: e => dispatch(onChangeRecipientPhoneNumberAction(e)),
+  onChangeRegion: e => dispatch(onChangeRegionAction(e)),
+  onChangeProvince: e => dispatch(onChangeProvinceAction(e)),
+  onChangeComuna: e => dispatch(onChangeComunaAction(e)),
+  onChangeAddress: e => dispatch(onChangeAddressAction(e)),
+  onChangeWeight: e => dispatch(onChangeWeightAction(e)),
+  onChangeValue: e => dispatch(onChangeValueAction(e)),
+  onChangeDescription: e => dispatch(onChangeDescriptionAction(e)),
+  onChangeQuantity: e => dispatch(onChangeQuantityAction(e)),
+  onChangeAddOrderStatus: e => dispatch(onChangeAddOrderStatusAction(e)),
+  onChangeAddOrderSuccessNumber: e => dispatch(onChangeAddOrderSuccessNumberAction(e)),
+  onChangeAddOrderFailNumber: e => dispatch(onChangeAddOrderFailNumberAction(e)),
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

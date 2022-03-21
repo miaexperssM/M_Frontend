@@ -7,6 +7,9 @@ import {
   ADD_ORDER_REQUEST,
   ADD_ORDER_SUCCESS,
   ADD_ORDER_FAILURE,
+  ADD_ORDER_LIST_REQUEST,
+  ADD_ORDER_LIST_FAILURE,
+  ADD_ORDER_LIST_SUCCESS,
   DEL_ORDER_REQUEST,
   DEL_ORDER_SUCCESS,
   DEL_ORDER_FAILURE,
@@ -37,6 +40,10 @@ import {
   ON_CHANGE_DESCRIPTION,
   ON_CHANGE_QUANTITY,
   TRACK_ORDER_SUCCESS,
+  ON_CHANGE_ADD_ORDER_STATUS,
+  ON_CHANGE_ADD_ORDER_SUCCESS_NUMBER,
+  ON_CHANGE_ADD_ORDER_FAIL_NUMBER,
+  GET_ORDERS_UPDATED_AT_SUCCESS,
 } from './orders.constants';
 
 export const initialState = {
@@ -45,6 +52,9 @@ export const initialState = {
   addOrderModalLoading: false,
   modifyOrderModalVisible: false,
   modifyOrderModalLoading: false,
+  addOrderState: undefined,
+  addOrderFailNumber: 0,
+  addOrderSuccessNumber: 0,
   trackorder: {},
   orderForm: {
     MAWB: '',
@@ -76,19 +86,40 @@ const ordersReducer = (state = initialState, action) =>
       case GET_ORDERS_SUCCESS:
         draft.ordersList = action.payload.data;
         break;
+      case GET_ORDERS_UPDATED_AT_SUCCESS:
+        draft.ordersList = action.payload.data;
+        break;
       case TRACK_ORDER_SUCCESS:
         draft.trackOrder = action.payload.data;
         break;
       case ADD_ORDER_REQUEST:
         draft.addOrderModalLoading = true;
+        draft.addOrderState = undefined;
         break;
       case ADD_ORDER_SUCCESS:
         draft.addOrderModalLoading = false;
         draft.addOrderModalVisible = false;
         draft.orderForm = initialState.orderForm;
+        draft.addOrderState = true;
         break;
       case ADD_ORDER_FAILURE:
         draft.addOrderModalLoading = false;
+        draft.addOrderState = false;
+        break;
+      case ADD_ORDER_LIST_REQUEST:
+        draft.addOrderModalLoading = true;
+        draft.addOrderFailNumber = 0;
+        draft.addOrderSuccessNumber = 0;
+        break;
+      case ADD_ORDER_LIST_SUCCESS:
+        draft.addOrderModalLoading = false;
+        draft.addOrderModalVisible = false;
+        draft.orderForm = initialState.orderForm;
+        draft.addOrderSuccessNumber += 1;
+        break;
+      case ADD_ORDER_LIST_FAILURE:
+        draft.addOrderModalLoading = false;
+        draft.addOrderFailNumber += 1;
         break;
       case MODIFY_ORDER_REQUEST:
         draft.modifyOrderModalLoading = true;
@@ -172,6 +203,16 @@ const ordersReducer = (state = initialState, action) =>
         break;
       case ON_CHANGE_QUANTITY:
         draft.orderForm.quantity = action.payload;
+        break;
+
+      case ON_CHANGE_ADD_ORDER_STATUS:
+        draft.addOrderState = action.payload;
+        break;
+      case ON_CHANGE_ADD_ORDER_SUCCESS_NUMBER:
+        draft.addOrderSuccessNumber = action.payload;
+        break;
+      case ON_CHANGE_ADD_ORDER_FAIL_NUMBER:
+        draft.addOrderFailNumber = action.payload;
         break;
     }
   });

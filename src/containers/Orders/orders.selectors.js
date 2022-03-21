@@ -5,11 +5,15 @@ import { initialState } from './orders.reducer';
 const selectOrdersDomain = state => state?.orders || initialState;
 
 const selectOrdersList = createSelector(selectOrdersDomain, substate => {
-  return sortBy(substate.ordersList, ['id']);
+  return sortBy(substate.ordersList, ['id'], ['desc']);
 });
 
 const selectAddOrderModalVisible = createSelector(selectOrdersDomain, substate => substate.addOrderModalVisible);
 const selectAddOrderModalLoading = createSelector(selectOrdersDomain, substate => substate.addOrderModalLoading);
+
+const selectAddOrderState = createSelector(selectOrdersDomain, substate => substate.addOrderState);
+const selectAddOrderSuccessNumber = createSelector(selectOrdersDomain, substate => substate.addOrderSuccessNumber);
+const selectAddOrderFailNumber = createSelector(selectOrdersDomain, substate => substate.addOrderFailNumber);
 
 const selectModifyOrderModalVisible = createSelector(selectOrdersDomain, substate => substate.modifyOrderModalVisible);
 const selectModifyOrderModalLoading = createSelector(selectOrdersDomain, substate => substate.modifyOrderModalLoading);
@@ -55,6 +59,9 @@ export {
   selectOrdersList,
   selectAddOrderModalVisible,
   selectAddOrderModalLoading,
+  selectAddOrderState,
+  selectAddOrderSuccessNumber,
+  selectAddOrderFailNumber,
   selectModifyOrderModalVisible,
   selectModifyOrderModalLoading,
   selectTrackOrder,

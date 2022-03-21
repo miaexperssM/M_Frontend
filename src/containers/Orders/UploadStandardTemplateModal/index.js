@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
+import * as excelDataTransfer from 'utils/excelDataTransfer';
 
 import {
   makeSelectMAWB,
@@ -49,75 +50,61 @@ import {
   addOrdersAction,
 } from '../orders.actions';
 
-function UploadFileModal(props) {
+function UploadStandardTemplateModal(props) {
   async function readFile() {
     let isDetailInfoSheet;
-    const input = document.getElementById('xlsxInput');
+    const input = document.getElementById('xlsxStandardInput');
     input.addEventListener('change', () => {
-      props.setUploadingPercent(0);
-      props.setFiles(input.files || []);
-      readXlsxFile(input.files[0], { getSheets: true }).then(sheets => {
-        isDetailInfoSheet = sheets.find(sheet => sheet === 'Detail info') !== undefined ? true : false;
-      });
-      readXlsxFile(input.files[0], { sheet: 'Detail info' }).then(async rows => {
-        for (let index = 0; index < rows.length; index++) {
-          props.setUploadingPercent(Math.ceil(index / rows.length) * 100);
+      if (input.files.length !== 0) {
+        const dataList = [];
+        props.setUploadingPercent(0);
+        props.setFiles(input.files);
+        readXlsxFile(input.files[0], { getSheets: true }).then(sheets => {
+          isDetailInfoSheet = sheets.find(sheet => sheet === 'Detail info') !== undefined ? true : false;
+        });
+        readXlsxFile(input.files[0], { sheet: 'Detail info' }).then(async rows => {
+          for (let index = 0; index < rows.length; index++) {
+            props.setUploadingPercent(Math.ceil(index / rows.length) * 100);
 
-          if (index === 1) {
-            if (rows[index].length !== 19) {
-              return;
+            if (index === 1) {
+              if (rows[index].length !== 19) {
+                return;
+              }
+            }
+            if (index >= 2) {
+              const row = rows[index];
+              const data = {
+                MAWB: excelDataTransfer.stringTrans(row[0]),
+                containerNumber: excelDataTransfer.stringTrans(row[1]),
+                trackingNumber: excelDataTransfer.stringTrans(row[2]),
+                shipper: excelDataTransfer.stringTrans(row[3]),
+                shipperPhoneNumber: excelDataTransfer.stringTrans(row[4]),
+                shipperAddress: excelDataTransfer.stringTrans(row[5]),
+                destinationCountry: excelDataTransfer.stringTrans(row[6]),
+                recipient: excelDataTransfer.stringTrans(row[7]),
+                RUT: excelDataTransfer.stringTrans(row[8]),
+                recipientPhoneNumber: excelDataTransfer.stringTrans(row[9]),
+                recipientEmail: excelDataTransfer.stringTrans(row[10]),
+                region: excelDataTransfer.stringTrans(row[11]),
+                province: excelDataTransfer.stringTrans(row[12]),
+                comuna: excelDataTransfer.stringTrans(row[13]),
+                address: excelDataTransfer.stringTrans(row[14]),
+                weight: excelDataTransfer.numberTrans(row[15]),
+                value: excelDataTransfer.numberTrans(row[16]),
+                description: excelDataTransfer.stringTrans(row[17]),
+                quantity: excelDataTransfer.numberTrans(row[18]),
+              };
+              dataList.push(data);
             }
           }
-          if (index >= 2) {
-            const row = rows[index];
-            const data = {
-              MAWB: row[0],
-              containerNumber: row[1],
-              tackingNumber: row[2],
-              shipper: row[3],
-              shipperPhoneNumber: row[4].toString(),
-              shipperAddress: row[5],
-              destinationCountry: row[6],
-              recipient: row[7],
-              RUT: row[8].toString(),
-              recipientPhoneNumber: row[9].toString(),
-              recipientEmail: row[10],
-              region: row[11],
-              province: row[12],
-              comuna: row[13],
-              address: row[14],
-              weight: row[15],
-              value: row[16],
-              description: row[17],
-              quantity: row[18],
-            };
-            await uploadOrder(data);
-          }
-        }
-      });
+          props.setUploadingDataList(dataList);
+        });
+      } else {
+        props.setUploadingPercent(100);
+        props.setFiles([]);
+        props.setUploadingDataList([]);
+      }
     });
-  }
-  async function uploadOrder(data) {
-    await props.onChangeMAWB(data.MAWB);
-    await props.onChangeContainerNumber(data.containerNumber);
-    await props.onChangeTrackingNumber(data.tackingNumber);
-    await props.onChangeShipper(data.shipper);
-    await props.onChangeShipperPhoneNumber(data.shipperPhoneNumber);
-    await props.onChangeShipperAddress(data.shipperAddress);
-    await props.onChangeDestinationCountry(data.destinationCountry);
-    await props.onChangeRecipient(data.recipient);
-    await props.onChangeRUT(data.RUT);
-    await props.onChangeRecipientPhoneNumber(data.recipientPhoneNumber);
-    await props.onChangeRecipientEmail(data.recipientEmail);
-    await props.onChangeRegion(data.region);
-    await props.onChangeProvince(data.province);
-    await props.onChangeComuna(data.comuna);
-    await props.onChangeAddress(data.address);
-    await props.onChangeWeight(data.weight);
-    await props.onChangeValue(data.value);
-    await props.onChangeDescription(data.description);
-    await props.onChangeQuantity(data.quantity);
-    await props.addOrders();
   }
 
   React.useEffect(() => {
@@ -127,7 +114,7 @@ function UploadFileModal(props) {
   return <React.Fragment />;
 }
 
-UploadFileModal.propTypes = {
+UploadStandardTemplateModal.propTypes = {
   MAWB: PropTypes.string,
   containerNumber: PropTypes.string,
   trackingNumber: PropTypes.string,
@@ -217,4 +204,4 @@ const mapDispatchToProps = dispatch => ({
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-export default compose(withConnect, memo)(UploadFileModal);
+export default compose(withConnect, memo)(UploadStandardTemplateModal);

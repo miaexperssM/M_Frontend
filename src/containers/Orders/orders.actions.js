@@ -8,6 +8,12 @@ import {
   ADD_ORDER_REQUEST,
   ADD_ORDER_SUCCESS,
   ADD_ORDER_FAILURE,
+  ADD_ORDER_LIST_REQUEST,
+  ADD_ORDER_LIST_SUCCESS,
+  ADD_ORDER_LIST_FAILURE,
+  GET_ORDERS_UPDATED_AT_REQUEST,
+  GET_ORDERS_UPDATED_AT_FAILURE,
+  GET_ORDERS_UPDATED_AT_SUCCESS,
   DEL_ORDER_REQUEST,
   DEL_ORDER_SUCCESS,
   DEL_ORDER_FAILURE,
@@ -37,6 +43,9 @@ import {
   ON_CHANGE_VALUE,
   ON_CHANGE_DESCRIPTION,
   ON_CHANGE_QUANTITY,
+  ON_CHANGE_ADD_ORDER_STATUS,
+  ON_CHANGE_ADD_ORDER_SUCCESS_NUMBER,
+  ON_CHANGE_ADD_ORDER_FAIL_NUMBER,
 } from './orders.constants';
 
 export const getOrdersAction = payload => ({ type: GET_ORDERS_REQUEST, payload });
@@ -47,9 +56,17 @@ export const trackOrdersAction = payload => ({ type: TRACK_ORDER_REQUEST, payloa
 export const trackOrdersSuccess = payload => ({ type: TRACK_ORDER_SUCCESS, payload });
 export const trackOrdersFailure = payload => ({ type: TRACK_ORDER_FAILURE, payload });
 
+export const getOrdersByUpdatedAtAction = payload => ({ type: GET_ORDERS_UPDATED_AT_REQUEST, payload });
+export const getOrdersByUpdatedAtSuccess = payload => ({ type: GET_ORDERS_UPDATED_AT_SUCCESS, payload });
+export const getOrdersByUpdatedAtFailure = payload => ({ type: GET_ORDERS_UPDATED_AT_FAILURE, payload });
+
 export const addOrdersAction = payload => ({ type: ADD_ORDER_REQUEST, payload });
 export const addOrdersSuccess = payload => ({ type: ADD_ORDER_SUCCESS, payload });
 export const addOrdersFailure = payload => ({ type: ADD_ORDER_FAILURE, payload });
+
+export const addOrderListAction = payload => ({ type: ADD_ORDER_LIST_REQUEST, payload });
+export const addOrderListSuccess = payload => ({ type: ADD_ORDER_LIST_SUCCESS, payload });
+export const addOrderListFailure = payload => ({ type: ADD_ORDER_LIST_FAILURE, payload });
 
 export const delOrdersAction = payload => ({ type: DEL_ORDER_REQUEST, payload });
 export const delOrdersSuccess = payload => ({ type: DEL_ORDER_SUCCESS, payload });
@@ -84,3 +101,7 @@ export const onChangeWeightAction = payload => ({ type: ON_CHANGE_WEIGHT, payloa
 export const onChangeValueAction = payload => ({ type: ON_CHANGE_VALUE, payload });
 export const onChangeDescriptionAction = payload => ({ type: ON_CHANGE_DESCRIPTION, payload });
 export const onChangeQuantityAction = payload => ({ type: ON_CHANGE_QUANTITY, payload });
+
+export const onChangeAddOrderStatusAction = payload => ({ type: ON_CHANGE_ADD_ORDER_STATUS, payload });
+export const onChangeAddOrderSuccessNumberAction = payload => ({ type: ON_CHANGE_ADD_ORDER_SUCCESS_NUMBER, payload });
+export const onChangeAddOrderFailNumberAction = payload => ({ type: ON_CHANGE_ADD_ORDER_FAIL_NUMBER, payload });

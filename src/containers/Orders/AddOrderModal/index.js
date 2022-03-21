@@ -68,7 +68,7 @@ function AddOrderModal(props) {
         <Input placeholder="Container Num" onChange={props.onChangeContainerNumber} value={props.containerNumber} />
       </div>
       <div style={{ marginBottom: 10 }}>
-        <Input placeholder="Tracking Num" onChange={props.onChangeTrackingNumber} value={props.trackingNumber} />
+        <Input placeholder="Tracking Num *" onChange={props.onChangeTrackingNumber} value={props.trackingNumber} />
       </div>
       <div style={{ marginBottom: 10 }}>
         <Input placeholder="Shipper" onChange={props.onChangeShipper} value={props.shipper} />
@@ -85,20 +85,20 @@ function AddOrderModal(props) {
       </div>
       <div style={{ marginBottom: 10 }}>
         <Input
-          placeholder="Destination Country"
+          placeholder="Destination Country *"
           onChange={props.onChangeDestinationCountry}
           value={props.destinationCountry}
         />
       </div>
       <div style={{ marginBottom: 10 }}>
-        <Input placeholder="Recipient" onChange={props.onChangeRecipient} value={props.recipient} />
+        <Input placeholder="Recipient *" onChange={props.onChangeRecipient} value={props.recipient} />
       </div>
       <div style={{ marginBottom: 10 }}>
         <Input placeholder="RUT" onChange={props.onChangeRUT} value={props.RUT} />
       </div>
       <div style={{ marginBottom: 10 }}>
         <Input
-          placeholder="Recipient Phone Num"
+          placeholder="Recipient Phone Num *"
           onChange={props.onChangeRecipientPhoneNumber}
           value={props.recipientPhoneNumber}
         />
@@ -107,16 +107,16 @@ function AddOrderModal(props) {
         <Input placeholder="Recipient Email" onChange={props.onChangeRecipientEmail} value={props.recipientEmail} />
       </div>
       <div style={{ marginBottom: 10 }}>
-        <Input placeholder="Region" onChange={props.onChangeRegion} value={props.region} />
+        <Input placeholder="Region *" onChange={props.onChangeRegion} value={props.region} />
       </div>
       <div style={{ marginBottom: 10 }}>
-        <Input placeholder="Province" onChange={props.onChangeProvince} value={props.province} />
+        <Input placeholder="Province *" onChange={props.onChangeProvince} value={props.province} />
       </div>
       <div style={{ marginBottom: 10 }}>
-        <Input placeholder="Comuna" onChange={props.onChangeComuna} value={props.comuna} />
+        <Input placeholder="Comuna *" onChange={props.onChangeComuna} value={props.comuna} />
       </div>
       <div style={{ marginBottom: 10 }}>
-        <Input placeholder="Detail Address" onChange={props.onChangeAddress} value={props.address} />
+        <Input placeholder="Detail Address *" onChange={props.onChangeAddress} value={props.address} />
       </div>
       <div style={{ marginBottom: 10 }}>
         <Tag>Weight</Tag>

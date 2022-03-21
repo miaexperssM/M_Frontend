@@ -127,6 +127,14 @@ function OrdersTable(props) {
       key: 'quantity',
     },
     {
+      title: 'Update Date',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      render: (value, record) => {
+        return value.toString().slice(0, 10);
+      },
+    },
+    {
       title: 'Search',
       dataIndex: 'search',
       key: 'search',
@@ -211,7 +219,7 @@ function OrdersTable(props) {
   /* ------------------ */
   /* -     Render     - */
   /* ------------------ */
-  return <Table dataSource={props.ordersList} columns={columns} />;
+  return <Table dataSource={props.ordersList} columns={columns} style={{ width: '120vw' }} />;
 }
 
 OrdersTable.propTypes = {

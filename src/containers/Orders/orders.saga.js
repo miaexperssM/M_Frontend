@@ -1,9 +1,13 @@
-import { takeLatest, call, put, select } from 'redux-saga/effects';
+import { takeLatest, call, put, select, takeEvery } from 'redux-saga/effects';
 import {
   getOrdersSuccess,
   getOrdersFailure,
   addOrdersFailure,
   addOrdersSuccess,
+  addOrderListSuccess,
+  addOrderListFailure,
+  getOrdersByUpdatedAtSuccess,
+  getOrdersByUpdatedAtFailure,
   delOrdersSuccess,
   delOrdersFailure,
   getOrdersAction,
@@ -18,8 +22,18 @@ import {
   MODIFY_ORDER_REQUEST,
   DEL_ORDER_REQUEST,
   TRACK_ORDER_REQUEST,
+  ADD_ORDER_LIST_REQUEST,
+  GET_ORDERS_UPDATED_AT_SUCCESS,
+  GET_ORDERS_UPDATED_AT_REQUEST,
 } from './orders.constants';
-import { getOrdersAPI, getOrderByTrackingNumberAPI, postOrdersAPI, putOrdersAPI, delOrdersAPI } from './orders.api';
+import {
+  getOrdersAPI,
+  getOrdersByUpdatedAtAPI,
+  getOrderByTrackingNumberAPI,
+  postOrdersAPI,
+  putOrdersAPI,
+  delOrdersAPI,
+} from './orders.api';
 import {
   makeSelectMAWB,
   makeSelectContainerNumber,
@@ -52,12 +66,37 @@ export function* getOrdersSaga() {
   }
 }
 
+export function* getOrdersByUpdatedAtSaga({ payload: updatedAt }) {
+  try {
+    console.log(updatedAt);
+    const ordersList = yield call(getOrdersByUpdatedAtAPI, { updatedAt: updatedAt });
+    yield put(getOrdersByUpdatedAtSuccess(ordersList));
+  } catch (error) {
+    yield put(getOrdersByUpdatedAtFailure(error));
+  }
+}
+
 export function* trackOrderSaga({ payload: trackingNumber }) {
   try {
     const order = yield call(getOrderByTrackingNumberAPI, { trackingNumber: trackingNumber });
     yield put(trackOrdersSuccess(order));
   } catch (error) {
     yield put(trackOrdersFailure(error));
+  }
+}
+
+export function* postOrderListSaga({ payload: list }) {
+  if (list.payload.length !== 0) {
+    for (const data of list.payload) {
+      try {
+        console.log(data);
+        yield call(postOrdersAPI, data);
+        yield put(addOrderListSuccess());
+        yield put(getOrdersAction());
+      } catch (error) {
+        yield put(addOrderListFailure(error));
+      }
+    }
   }
 }
 
@@ -173,9 +212,11 @@ export function* delOrdersSaga({ payload: id }) {
 }
 
 export default function* usersSaga() {
-  yield takeLatest(GET_ORDERS_REQUEST, getOrdersSaga);
-  yield takeLatest(ADD_ORDER_REQUEST, postOrdersSaga);
-  yield takeLatest(MODIFY_ORDER_REQUEST, putOrdersSaga);
-  yield takeLatest(DEL_ORDER_REQUEST, delOrdersSaga);
-  yield takeLatest(TRACK_ORDER_REQUEST, trackOrderSaga);
+  yield takeEvery(GET_ORDERS_REQUEST, getOrdersSaga);
+  yield takeEvery(ADD_ORDER_REQUEST, postOrdersSaga);
+  yield takeEvery(MODIFY_ORDER_REQUEST, putOrdersSaga);
+  yield takeEvery(DEL_ORDER_REQUEST, delOrdersSaga);
+  yield takeEvery(TRACK_ORDER_REQUEST, trackOrderSaga);
+  yield takeEvery(ADD_ORDER_LIST_REQUEST, postOrderListSaga);
+  yield takeLatest(GET_ORDERS_UPDATED_AT_REQUEST, getOrdersByUpdatedAtSaga);
 }

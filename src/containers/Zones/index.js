@@ -197,7 +197,7 @@ function Zones(props) {
             </Col>
           </Row>
         </TabPane>
-        <TabPane tab="Data table" key="2" disabled={props.user.permissions !== user ? false : true}>
+        <TabPane tab="Zones Data" key="2" disabled={props.user.permissions !== user ? false : true}>
           <Row>
             <Col span={24}>
               <ZonesTable

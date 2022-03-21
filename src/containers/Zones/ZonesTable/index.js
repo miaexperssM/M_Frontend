@@ -38,7 +38,6 @@ function ZonesTable(props) {
       key: 'view',
       render: (value, record) => renderViewButton(value, record),
     },
-    ,
     {
       title: 'Edit',
       dataIndex: 'edit',

@@ -1,8 +1,11 @@
 import request from 'utils/request';
 
 export function getOrdersAPI() {
-  // return request.get('v1/users?limit=100');
   return request.get('v1/orders?limit=100');
+}
+
+export function getOrdersByUpdatedAtAPI(payload) {
+  return request.get(`v1/orders/updatedAt/${payload.updatedAt}`);
 }
 
 export function getOrderByTrackingNumberAPI(payload) {
