@@ -4,7 +4,7 @@
   "description": "ReactJS with AntD Frontend",
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build --max_old_space_size=600",
+    "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject"
   },
