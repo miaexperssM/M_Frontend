@@ -12,7 +12,7 @@ function Header(props) {
   const userId = props.user ? props.user.id : 'unknown';
   const permisssion = props.user ? props.user.permissions : 'unknown';
 
-  const version = 'v1.1.0';
+  const version = 'v1.2.0';
 
   return (
     <Layout.Header style={{ height: '48px', lineHeight: '48px', padding: '0 30px' }}>
