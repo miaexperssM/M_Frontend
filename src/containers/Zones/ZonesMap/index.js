@@ -22,7 +22,7 @@ function ZonesMap(props) {
   /* ------------------ */
   return (
     <div>
-      <div id="map" style={{ height: '70vh', width: '100%' }}>
+      <div id="map" style={{ height: '63vh', width: '100%' }}>
         <GoogleMapComp
           setGoogle={props.setGoogle}
           google={google}

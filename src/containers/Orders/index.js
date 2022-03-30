@@ -4,9 +4,12 @@ import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { Row, Col, Button, Tabs, Input, message, Spin, Tag, notification, Progress, DatePicker } from 'antd';
+import { Row, Col, Button, Tabs, Input, message, Spin, Tag, notification, Progress, DatePicker, Tooltip } from 'antd';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
+import { ExportToExcel } from 'utils/exportToExcel';
+import dayjs from 'dayjs';
+
 import {
   delOrdersAction,
   getOrdersAction,
@@ -61,6 +64,7 @@ import {
   makeSelectValue,
   makeSelectDescription,
   makeSelectQuantity,
+  selectOrdersList,
 } from './orders.selectors';
 
 import reducer from './orders.reducer';
@@ -90,6 +94,7 @@ function Orders(props) {
   const { TabPane } = Tabs;
   const [tabsKey, setTabsKey] = React.useState('1');
   const [destinationAddress, setDestinationAddress] = React.useState('');
+  const [orderDescription, setOrderDescription] = React.useState('');
   const [modifyingId, setModifyingId] = React.useState(0);
   const [files, setFiles] = React.useState([]);
   const [uploadingDataList, setUploadingDataList] = React.useState([]);
@@ -144,7 +149,6 @@ function Orders(props) {
 
           if (props.zonesList && props.zonesList.length !== 0) {
             const zone = props.zonesList.find(zone => {
-              console.log('searching zone', latlng, zone);
               const points = zone.points;
               const isIn = isInPolygon(latlng, points);
               if (isIn === true) {
@@ -152,7 +156,6 @@ function Orders(props) {
               }
               return isIn;
             });
-            console.log('zone', zone, latlng);
             setZoneResult(zone);
           } else if (props.zonesList && props.zonesList.length === 0) {
             message.warning('zones data error, please set or re-read zones data');
@@ -244,9 +247,11 @@ function Orders(props) {
       setDestinationAddress(
         `${record.address}, ${record.comuna}, ${record.province}, ${record.region}, ${record.destinationCountry}`,
       );
+      setOrderDescription(record.description);
       setInputTrackingNumber('');
     } else {
       setDestinationAddress('');
+      setOrderDescription('');
     }
   }, [props.trackOrder]);
 
@@ -309,17 +314,25 @@ function Orders(props) {
               <p>{destinationAddress}</p>
             </Col>
           </Row>
+          <Row style={{ marginTop: '20px' }}>
+            <Col span={8}>
+              <p>Order Description</p>
+            </Col>
+            <Col span={16}>
+              <p>{orderDescription}</p>
+            </Col>
+          </Row>
           <Row>
             <Col span={8}>{searching ? <Spin spinning={searching} tip="Searching..." /> : <React.Fragment />}</Col>
           </Row>
-          <Row style={{ marginTop: '20px' }}>
+          <Row style={{ marginTop: '100px' }}>
             <Col span={8}>
               <p>Zone Info:</p>
             </Col>
           </Row>
           <Row style={{ marginTop: '10px' }}>
             <Col span={8}>
-              <p style={{ fontSize: '18px' }}>Title</p>
+              <p style={{ marginLeft: '10px', fontSize: '18px' }}>Title</p>
             </Col>
             <Col span={16}>
               <p style={{ fontSize: '28px' }}>{zoneResult ? zoneResult.title : ''}</p>
@@ -327,7 +340,7 @@ function Orders(props) {
           </Row>
           <Row style={{ marginTop: '10px' }}>
             <Col span={8}>
-              <p style={{ fontSize: '18px' }}>Description</p>
+              <p style={{ marginLeft: '10px', fontSize: '18px' }}>Description</p>
             </Col>
             <Col span={16}>
               <p style={{ fontSize: '28px' }}>{zoneResult ? zoneResult.description : ''}</p>
@@ -335,13 +348,20 @@ function Orders(props) {
           </Row>
         </TabPane>
         <TabPane tab="Orders Data" key="2">
+          <ModifyOrderModal modifyingId={modifyingId} />
           <Row style={{ marginTop: '20px', marginBottom: '20px' }}>
             <Col span={4}> Search by Update Date:</Col>
             <Col span={6}>
               <DatePicker onChange={onDatePickerChange} format={'DD-MM-YYYY'} />
             </Col>
+            <Col span={4}>
+              <ExportToExcel
+                apiData={props.orderList}
+                notice={datePicker == '' ? 'All Data' : 'Only export data that updated at left search date'}
+                fileName={`OrderExport_${dayjs().format('YYYY-MM-DD_hh-mm-ss')}`}
+              />
+            </Col>
           </Row>
-
           <Row style={{ width: '100%', overflowX: 'scroll' }}>
             <Col span={24}>
               <OrdersTable
@@ -479,6 +499,7 @@ Orders.propTypes = {
 const mapStateToProps = createStructuredSelector({
   user: makeSelectUser(),
   trackOrder: selectTrackOrder,
+  orderList: selectOrdersList,
   zonesList: selectZonesList,
   addOrderState: selectAddOrderState,
   addOrderFailNumber: selectAddOrderFailNumber,

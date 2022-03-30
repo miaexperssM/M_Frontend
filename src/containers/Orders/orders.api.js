@@ -1,7 +1,7 @@
 import request from 'utils/request';
 
 export function getOrdersAPI() {
-  return request.get('v1/orders?limit=100');
+  return request.get('v1/orders');
 }
 
 export function getOrdersByUpdatedAtAPI(payload) {
