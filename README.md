@@ -73,5 +73,9 @@ src
 ├── global.selectors.js
 └── index.js
 ```
+
 # M_frontend
+
+## Version: 2.0.0 -- Date: 23 July, 2022
+
 # M_Frontend
