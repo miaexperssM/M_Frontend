@@ -148,7 +148,7 @@ function Orders(props) {
     if (datePickerRange) {
       props.getOrdersByUpdatedAt(datePickerRange);
     } else {
-      props.getOrders();
+      props.getOrders({ offset: 1, limit: 100 });
     }
   }, [datePickerRange]);
 
@@ -456,7 +456,7 @@ const mapStateToProps = createStructuredSelector({
 
 const mapDispatchToProps = dispatch => ({
   getZones: () => dispatch(getZonesAction()),
-  getOrders: () => dispatch(getOrdersAction()),
+  getOrders: payload => dispatch(getOrdersAction(payload)),
   getOrdersByUpdatedAt: date => dispatch(getOrdersByUpdatedAtAction(date)),
   getTrackOrder: trackingNumber => dispatch(trackOrdersAction(trackingNumber)),
   delOrders: id => dispatch(delOrdersAction(id)),

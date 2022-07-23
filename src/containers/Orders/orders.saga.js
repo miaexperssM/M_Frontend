@@ -57,9 +57,9 @@ import {
   makeSelectOrdersById,
 } from './orders.selectors';
 
-export function* getOrdersSaga() {
+export function* getOrdersSaga({ payload: { offset, limit } }) {
   try {
-    const ordersList = yield call(getOrdersAPI);
+    const ordersList = yield call(getOrdersAPI, { offset, limit });
     yield put(getOrdersSuccess(ordersList));
   } catch (error) {
     yield put(getOrdersFailure(error));

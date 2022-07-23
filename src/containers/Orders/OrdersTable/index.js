@@ -28,6 +28,7 @@ import {
   onChangeQuantityAction,
   modifyOrdersAction,
   delOrdersAction,
+  getOrdersAction,
 } from '../orders.actions';
 import { Admin } from 'utils/enum';
 import { makeSelectUser } from 'global.selectors';
@@ -188,6 +189,10 @@ function OrdersTable(props) {
     );
   };
 
+  const onPageChange = (page, pageSize) => {
+    console.log('change page');
+  };
+
   const handleDelete = id => {
     props.delOrders(id);
   };
@@ -254,6 +259,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const mapDispatchToProps = dispatch => ({
+  getOrders: payload => dispatch(getOrdersAction(payload)),
   modifyOrders: id => dispatch(modifyOrdersAction(id)),
   onDeleteOrder: id => dispatch(delOrdersAction(id)),
   handleModifyOrderModalCancel: () => dispatch(handleModifyOrderModalCancelAction()),

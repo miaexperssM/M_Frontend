@@ -1,7 +1,9 @@
 import request from 'utils/request';
 
-export function getOrdersAPI() {
-  return request.get('v1/orders');
+export function getOrdersAPI(payload) {
+  const offset = payload.offset || 1;
+  const limit = payload.limit || 100;
+  return request.get(`v1/orders?offset=${offset}&&limit=${limit}`);
 }
 
 export function getOrdersByUpdatedAtAPI(payload) {
