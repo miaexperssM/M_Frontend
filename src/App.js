@@ -20,7 +20,9 @@ export default function App() {
         <Layout>
           <Layout.Content style={{ margin: '16px' }}>
             <Switch>
-              {mainRoutes.map(route => (route.auth ? <PrivateRoute {...route} /> : <Route {...route} />))}
+              {mainRoutes.map(route =>
+                route.auth ? <PrivateRoute {...route} key={route.path} /> : <Route {...route} key={route.path} />,
+              )}
             </Switch>
           </Layout.Content>
           <Layout.Footer style={{ textAlign: 'center' }}>Mia Express</Layout.Footer>

@@ -66,10 +66,10 @@ export function* getOrdersSaga() {
   }
 }
 
-export function* getOrdersByUpdatedAtSaga({ payload: updatedAt }) {
+export function* getOrdersByUpdatedAtSaga({ payload: { from, to } }) {
   try {
-    console.log(updatedAt);
-    const ordersList = yield call(getOrdersByUpdatedAtAPI, { updatedAt: updatedAt });
+    console.log({ from, to });
+    const ordersList = yield call(getOrdersByUpdatedAtAPI, { from, to });
     yield put(getOrdersByUpdatedAtSuccess(ordersList));
   } catch (error) {
     yield put(getOrdersByUpdatedAtFailure(error));

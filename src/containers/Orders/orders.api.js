@@ -5,7 +5,7 @@ export function getOrdersAPI() {
 }
 
 export function getOrdersByUpdatedAtAPI(payload) {
-  return request.get(`v1/orders/updatedAt/${payload.updatedAt}`);
+  return request.get(`v1/orders/updatedAt/${payload.from}/${payload.to}`);
 }
 
 export function getOrderByTrackingNumberAPI(payload) {

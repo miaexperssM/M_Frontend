@@ -166,9 +166,9 @@ function OrdersTable(props) {
     return (
       <Button>
         <Link
-          to={`/zones/${record.address}, ${record.comuna}, ${record.province}, ${record.region}, ${record.destinationCountry}`}
+          to={`/zones?address=${record.address}, ${record.comuna}, ${record.province}, ${record.region}, ${record.destinationCountry}`}
         >
-          Go TO
+          Go To
         </Link>
       </Button>
     );

@@ -9,12 +9,17 @@ export const ExportToExcel = ({ apiData, notice, fileName }) => {
 
   const dataFilter = apiData => {
     return apiData.map(item => {
-      const { id, isDeleted, createdBy, ...filteredData } = item;
-      return filteredData;
+      const { id, isDeleted, createdBy, zone, zoneId, placeIdInGoogle, ...filteredData } = item;
+      return {
+        ...filteredData,
+        zone_Name: zoneId === -1 ? 'Not Found' : zone.title,
+        zone_Description: zoneId === -1 ? 'Not Found' : zone.description,
+      };
     });
   };
 
   const exportToCSV = (apiData, fileName) => {
+    console.log(apiData);
     const filteredData = dataFilter(apiData);
     const ws = XLSX.utils.json_to_sheet(filteredData);
     const wb = { Sheets: { data: ws }, SheetNames: ['data'] };

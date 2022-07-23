@@ -12,6 +12,14 @@ const mainRoutes = [
     path: '/',
     name: 'Home',
     icon: 'home',
+    component: Orders,
+    auth: true,
+  },
+  {
+    exact: true,
+    path: '/zones',
+    name: 'Zone',
+    icon: 'zone',
     component: Zones,
     auth: true,
   },
@@ -36,18 +44,19 @@ const mainRoutes = [
     component: SignUp,
   },
   {
-    path: '/signout',
-    name: 'Sign Out',
-    component: SignOut,
-    auth: true,
-  },
-  {
     path: '/users',
     name: 'Users',
     component: Users,
     auth: true,
     permission: 'Admin',
   },
+  {
+    path: '/signout',
+    name: 'Sign Out',
+    component: SignOut,
+    auth: true,
+  },
+
   {
     path: '',
     name: 'Others',
@@ -56,7 +65,6 @@ const mainRoutes = [
     hide: true,
     component: Zones,
   },
-  ,
   {
     path: '/zones/:location',
     name: 'zonesNavigate',

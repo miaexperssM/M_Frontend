@@ -35,13 +35,11 @@ function Zones(props) {
   const [longtidue, setLongtidue] = useState(0);
 
   const [modifyingId, setModifyingId] = React.useState(0);
-  const [google, setGoogle] = React.useState();
-  const [googlemap, setGoogleMap] = React.useState();
+  const [google, setGoogle] = React.useState(undefined);
+  const [googlemap, setGoogleMap] = React.useState(undefined);
 
   const [tabsKey, setTabsKey] = React.useState('1');
-
-  let service;
-  let infowindow;
+  const [service, setService] = React.useState(undefined);
 
   const handleLon = e => {
     if (e) {
@@ -60,10 +58,12 @@ function Zones(props) {
   };
 
   const onPlaceSearch = (depth, place) => {
+    if (service === undefined || service === undefined) {
+      return;
+    }
     if (place) {
       console.log('search location:', place);
       const request = { query: place, fields: ['name', 'geometry'] };
-      service = new google.maps.places.PlacesService(googlemap);
       service.findPlaceFromQuery(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
           for (let i = 0; i < results.length; i++) {
@@ -84,7 +84,7 @@ function Zones(props) {
     } else {
       console.log('search location:', searchLocation);
       const request = { query: searchLocation, fields: ['name', 'geometry'] };
-      service = new google.maps.places.PlacesService(googlemap);
+      // service = new google.maps.places.PlacesService(googlemap);
       service.findPlaceFromQuery(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
           for (let i = 0; i < results.length; i++) {
@@ -106,6 +106,9 @@ function Zones(props) {
   };
 
   const onCoordsSearch = (depth, point) => {
+    if (googlemap === undefined) {
+      return;
+    }
     if (point) {
       console.log('search coords:', `lon:${point.lng},lat:${point.lat}`);
       const curlongtidue = point.lng;
@@ -137,18 +140,68 @@ function Zones(props) {
     }
   };
 
+  const onPlaceIdSearch = (depth, placeId) => {
+    if (service === undefined) {
+      return;
+    }
+    if (placeId) {
+      console.log('search placeId:', placeId);
+      const request = { placeId };
+      // service = new google.maps.places.PlacesService(googlemap);
+      service.getDetails(request, (results, status) => {
+        console.log('results', results, status);
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+          const marker = new google.maps.Marker({
+            position: results.geometry.location,
+            map: googlemap,
+            title: 'search result',
+          });
+          googlemap.setCenter(results.geometry.location);
+          googlemap.setZoom(16);
+          console.log(marker);
+        } else if (status === 'ZERO_RESULTS' && results === null) {
+          message.error('No result');
+        }
+      });
+    } else {
+      notification.error('placeId input is not correct');
+    }
+  };
+
   useEffect(() => {
     props.getZones();
   }, []);
 
+  useEffect(() => {
+    if (google && googlemap) {
+      setService(new google.maps.places.PlacesService(googlemap));
+    } else {
+      setService(undefined);
+    }
+  }, [google, googlemap]);
+
   React.useEffect(() => {
-    const searchAddress = location.pathname.split('/')[2] || '';
-    if (searchAddress !== '') {
-      if (google && googlemap) {
+    const queryString = location.search;
+    const params = new URLSearchParams(queryString);
+    const searchGoogleId = params.get('placeId');
+    const searchLocationLng = parseFloat(params.get('lng'));
+    const searchLocationLat = parseFloat(params.get('lat'));
+    const searchAddress = params.get('address');
+    console.log(service);
+    if (service) {
+      if (searchGoogleId && searchGoogleId !== '') {
+        onPlaceIdSearch(12, searchGoogleId);
+        return;
+      } else if (searchLocationLng && searchLocationLng && searchLocationLng !== '' && searchLocationLat !== '') {
+        onCoordsSearch(12, { lng: searchLocationLng, lat: searchLocationLat });
+        return;
+      } else if (searchAddress && searchAddress !== '') {
         onPlaceSearch(12, searchAddress);
+      } else {
+        onPlaceSearch(12, undefined);
       }
     }
-  }, [location, google, googlemap]);
+  }, [location, service, google, googlemap]);
 
   const { TabPane } = Tabs;
 

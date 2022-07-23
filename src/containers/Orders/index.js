@@ -4,12 +4,12 @@ import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { Row, Col, Button, Tabs, Input, message, Spin, Tag, notification, Progress, DatePicker, Tooltip } from 'antd';
+import { Row, Col, Button, Tabs, Input, Spin, Tag, notification, Progress, DatePicker } from 'antd';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
 import { ExportToExcel } from 'utils/exportToExcel';
 import dayjs from 'dayjs';
-
+import { Link } from 'react-router-dom';
 import {
   delOrdersAction,
   getOrdersAction,
@@ -81,11 +81,12 @@ import ModifyOrderModal from './ModifyOrderModal';
 import OrdersTable from './OrdersTable';
 import UploadStandardTemplateModal from './UploadStandardTemplateModal';
 import UploadSimpleTemplateModal from './UploadSimpleTemplateModal';
-import { Loader, LoaderOptions } from 'google-maps';
 import { getZonesAction } from 'containers/Zones/zones.actions';
 import { selectZonesList } from 'containers/Zones/zones.selectors';
 
 const key = 'orders';
+
+const { RangePicker } = DatePicker;
 
 function Orders(props) {
   useInjectReducer({ key, reducer });
@@ -95,114 +96,25 @@ function Orders(props) {
   const [tabsKey, setTabsKey] = React.useState('1');
   const [destinationAddress, setDestinationAddress] = React.useState('');
   const [orderDescription, setOrderDescription] = React.useState('');
+  const [orderPlaceId, setOrderPlaceId] = React.useState('');
   const [modifyingId, setModifyingId] = React.useState(0);
   const [files, setFiles] = React.useState([]);
   const [uploadingDataList, setUploadingDataList] = React.useState([]);
-  const googleRef = React.useRef();
   const [zoneResult, setZoneResult] = React.useState();
   const [inputTrackingNumber, setInputTrackingNumber] = React.useState('');
   const [searching, setSearching] = React.useState(false);
   const [uploadedFailed, setUploadedFailed] = React.useState(0);
   const [uploadedSuccessful, setUploadedSuccessful] = React.useState(0);
   const [uploadingPercent, setUploadingPercent] = React.useState(100);
-  const [datePicker, setDatePicker] = React.useState('');
-
-  let service;
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  async function init() {
-    await props.getOrders();
-  }
+  const [datePickerRange, setDatePickerRange] = React.useState(undefined);
 
   async function getTrackOrder(trackingNumber) {
     setSearching(true);
     await props.getTrackOrder(trackingNumber);
   }
 
-  async function getCoordinate(address) {
-    const apiKey = process.env.REACT_APP_GOOGLE_API_KEY;
-    const options = { libraries: ['drawing', 'places'] };
-    const loader = new Loader(apiKey, options);
-    const google = await loader.load();
-    googleRef.current = google;
-
-    const request = {
-      query: address,
-      fields: ['name', 'geometry'],
-    };
-
-    const map = new google.maps.Map(document.getElementById('map'), {
-      center: { lat: 1, lng: 103 },
-      zoom: 15,
-    });
-
-    service = new google.maps.places.PlacesService(map);
-    service.findPlaceFromQuery(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-        for (let i = 0; i < results.length; i++) {
-          const lat = results[0].geometry.location.lat();
-          const lng = results[0].geometry.location.lng();
-          const latlng = { lat, lng };
-
-          if (props.zonesList && props.zonesList.length !== 0) {
-            const zone = props.zonesList.find(zone => {
-              const points = zone.points;
-              const isIn = isInPolygon(latlng, points);
-              if (isIn === true) {
-                console.log('find zone: ', zone);
-              }
-              return isIn;
-            });
-            setZoneResult(zone);
-          } else if (props.zonesList && props.zonesList.length === 0) {
-            message.warning('zones data error, please set or re-read zones data');
-          } else {
-            message.error('zones data error, please read zones data in Home page');
-          }
-          break;
-        }
-      } else if (status === 'ZERO_RESULTS' && results === null) {
-        message.error('No result');
-      }
-      setSearching(false);
-    });
-  }
-
   function onDatePickerChange(date, dateString) {
-    setDatePicker(dateString);
-  }
-
-  function isInPolygon(checkPoint, polygonPoints) {
-    let counter = 0;
-    let i;
-    let xinters;
-    let p1, p2;
-    let pointCount = polygonPoints.length;
-    p1 = polygonPoints[0];
-
-    for (i = 1; i <= pointCount; i++) {
-      p2 = polygonPoints[i % pointCount];
-
-      if (checkPoint.lat > Math.min(p1.lat, p2.lat) && checkPoint.lat <= Math.max(p1.lat, p2.lat)) {
-        if (checkPoint.lng <= Math.max(p1.lng, p2.lng)) {
-          if (p1.lat !== p2.lat) {
-            xinters = ((checkPoint.lat - p1.lat) * (p2.lng - p1.lng)) / (p2.lat - p1.lat) + p1.lng;
-            if (p1.lng === p2.lng || checkPoint.lng <= xinters) {
-              counter++;
-            }
-          }
-        }
-      }
-      p1 = p2;
-    }
-    if (counter % 2 === 0) {
-      return false;
-    } else {
-      return true;
-    }
+    setDatePickerRange({ from: date[0].format(), to: date[1].format() });
   }
 
   const openNotificationWithIcon = type => {
@@ -232,13 +144,13 @@ function Orders(props) {
   };
 
   useEffect(() => {
-    console.log('search order updatedAt', datePicker);
-    if (datePicker !== '') {
-      props.getOrdersByUpdatedAt(datePicker);
+    console.log('search order updatedAt', datePickerRange);
+    if (datePickerRange) {
+      props.getOrdersByUpdatedAt(datePickerRange);
     } else {
       props.getOrders();
     }
-  }, [datePicker]);
+  }, [datePickerRange]);
 
   useEffect(() => {
     console.log('track', props.trackOrder);
@@ -249,15 +161,15 @@ function Orders(props) {
       );
       setOrderDescription(record.description);
       setInputTrackingNumber('');
+      setOrderPlaceId(record.placeIdInGoogle);
+      setZoneResult(record.zone);
     } else {
       setDestinationAddress('');
       setOrderDescription('');
+      setOrderPlaceId('');
     }
+    setSearching(false);
   }, [props.trackOrder]);
-
-  useEffect(() => {
-    getCoordinate(destinationAddress);
-  }, [destinationAddress]);
 
   useEffect(() => {
     onUploadResult(props.addOrderState);
@@ -288,8 +200,6 @@ function Orders(props) {
         <title>Orders List</title>
         <meta name="Orders" content="Orders List" />
       </Helmet>
-      <div id="map" style={{ height: '0px' }}></div>
-
       <div style={{ marginLeft: '40px', marginBottom: '10px' }}>
         <h1 style={{ fontSize: 'x-large' }}> Orders List </h1>
       </div>
@@ -299,6 +209,8 @@ function Orders(props) {
             <Col span={24}>
               <Input
                 onPressEnter={e => {
+                  setDestinationAddress('');
+                  setOrderDescription('');
                   getTrackOrder(e.target.value);
                 }}
                 value={inputTrackingNumber}
@@ -330,21 +242,36 @@ function Orders(props) {
               <p>Zone Info:</p>
             </Col>
           </Row>
-          <Row style={{ marginTop: '10px' }}>
-            <Col span={8}>
-              <p style={{ marginLeft: '10px', fontSize: '18px' }}>Title</p>
-            </Col>
-            <Col span={16}>
-              <p style={{ fontSize: '28px' }}>{zoneResult ? zoneResult.title : ''}</p>
-            </Col>
-          </Row>
-          <Row style={{ marginTop: '10px' }}>
-            <Col span={8}>
-              <p style={{ marginLeft: '10px', fontSize: '18px' }}>Description</p>
-            </Col>
-            <Col span={16}>
-              <p style={{ fontSize: '28px' }}>{zoneResult ? zoneResult.description : ''}</p>
-            </Col>
+          {zoneResult ? (
+            <div>
+              <Row style={{ marginTop: '10px' }}>
+                <Col span={8}>
+                  <p style={{ marginLeft: '10px', fontSize: '24px' }}>Title</p>
+                </Col>
+                <Col span={16}>
+                  <p style={{ fontSize: '36px' }}>{zoneResult.title}</p>
+                </Col>
+              </Row>
+              <Row style={{ marginTop: '10px' }}>
+                <Col span={8}>
+                  <p style={{ marginLeft: '10px', fontSize: '24px' }}>Description</p>
+                </Col>
+                <Col span={16}>
+                  <p style={{ fontSize: '36px' }}>{zoneResult.description}</p>
+                </Col>
+              </Row>
+            </div>
+          ) : (
+            <div>
+              <Row style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}>
+                <p style={{ fontSize: '40px', color: 'red' }}>NO RESULT FOUND IN ZONE</p>
+              </Row>
+            </div>
+          )}
+          <Row style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}>
+            <Button disabled={orderPlaceId === ''}>
+              <Link to={`/zones?placeId=${orderPlaceId}`}>View Place In Map</Link>
+            </Button>
           </Row>
         </TabPane>
         <TabPane tab="Orders Data" key="2">
@@ -352,12 +279,14 @@ function Orders(props) {
           <Row style={{ marginTop: '20px', marginBottom: '20px' }}>
             <Col span={4}> Search by Update Date:</Col>
             <Col span={6}>
-              <DatePicker onChange={onDatePickerChange} format={'DD-MM-YYYY'} />
+              <RangePicker onChange={onDatePickerChange} format={'DD-MM-YYYY'} />
             </Col>
             <Col span={4}>
               <ExportToExcel
                 apiData={props.orderList}
-                notice={datePicker == '' ? 'All Data' : 'Only export data that updated at left search date'}
+                notice={
+                  datePickerRange === undefined ? 'All Data' : 'Only export data that updated at left search date'
+                }
                 fileName={`OrderExport_${dayjs().format('YYYY-MM-DD_hh-mm-ss')}`}
               />
             </Col>
