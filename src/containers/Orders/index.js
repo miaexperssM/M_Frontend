@@ -148,7 +148,7 @@ function Orders(props) {
     if (datePickerRange) {
       props.getOrdersByUpdatedAt(datePickerRange);
     } else {
-      props.getOrders({ offset: 1, limit: 50 });
+      props.getOrders({ offset: 1, limit: 1000 });
     }
   }, [datePickerRange]);
 

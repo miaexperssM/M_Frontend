@@ -1,7 +1,6 @@
 import request from 'utils/request';
 
 export function getZonesAPI() {
-  // return request.get('v1/zones?limit=100');
   return request.get('v1/zones');
 }
 
