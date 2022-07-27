@@ -89,11 +89,10 @@ export function* postOrderListSaga({ payload: list }) {
   if (list.payload.length !== 0) {
     for (const data of list.payload) {
       try {
-        console.log(data);
-        yield call(postOrdersAPI, data);
-        yield put(addOrderListSuccess());
-        yield put(getOrdersAction());
+        const newOrder = yield call(postOrdersAPI, data);
+        yield put(addOrderListSuccess(newOrder));
       } catch (error) {
+        console.log('postOrderListSaga errror', error);
         yield put(addOrderListFailure(error));
       }
     }

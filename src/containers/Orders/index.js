@@ -114,7 +114,11 @@ function Orders(props) {
   }
 
   function onDatePickerChange(date, dateString) {
-    setDatePickerRange({ from: date[0].format(), to: date[1].format() });
+    if (date === null) {
+      setDatePickerRange(undefined);
+    } else {
+      setDatePickerRange({ from: date[0].format(), to: date[1].format() });
+    }
   }
 
   const openNotificationWithIcon = type => {
@@ -148,7 +152,7 @@ function Orders(props) {
     if (datePickerRange) {
       props.getOrdersByUpdatedAt(datePickerRange);
     } else {
-      props.getOrders({ offset: 1, limit: 1000 });
+      props.getOrders({ offset: 1, limit: 3000 });
     }
   }, [datePickerRange]);
 

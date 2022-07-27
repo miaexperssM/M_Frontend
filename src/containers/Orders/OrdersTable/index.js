@@ -132,7 +132,9 @@ function OrdersTable(props) {
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       render: (value, record) => {
-        return value.toString().slice(0, 10);
+        if (value) {
+          return value.toString().slice(0, 10);
+        } else return 'Undefined';
       },
     },
     {
