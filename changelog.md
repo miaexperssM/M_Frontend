@@ -38,3 +38,24 @@
   1. Backend response speed
 - Bug fix:
   1. Edit order popup might can not show
+
+## v2.0.0
+
+- RelaseDate: 2022.07.23
+- Feature:
+  1. refactor, change map api to backend
+  2. add go to view button when search by tracking number
+- Improvement:
+  1. Backend response speed
+- Bug fix:
+
+## v2.0.1
+
+- RelaseDate: 2022.07.28
+- Feature:
+  1. add new order into list when post successfull
+- Improvement:
+  1. Backend response speed
+  2. Add order by excel speed up
+- Bug fix:
+  1. Backend order entity expiredDate nullable

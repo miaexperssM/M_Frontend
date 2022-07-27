@@ -121,7 +121,7 @@ export function* postOrdersSaga() {
   const quantity = yield select(makeSelectQuantity);
 
   try {
-    yield call(postOrdersAPI, {
+    const newOrder = yield call(postOrdersAPI, {
       MAWB,
       containerNumber,
       trackingNumber,
@@ -142,9 +142,9 @@ export function* postOrdersSaga() {
       description,
       quantity,
     });
-    yield put(addOrdersSuccess());
-    yield put(getOrdersAction());
+    yield put(addOrdersSuccess(newOrder));
   } catch (error) {
+    console.log('postOrdersSaga errror', error);
     yield put(addOrdersFailure(error));
   }
 }

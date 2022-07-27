@@ -99,6 +99,7 @@ const ordersReducer = (state = initialState, action) =>
       case ADD_ORDER_SUCCESS:
         draft.addOrderModalLoading = false;
         draft.addOrderModalVisible = false;
+        draft.ordersList = draft.ordersList.concat([action.payload.data]);
         draft.orderForm = initialState.orderForm;
         draft.addOrderState = true;
         break;

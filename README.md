@@ -78,4 +78,6 @@ src
 
 ## Version: 2.0.0 -- Date: 23 July, 2022
 
+## Version: 2.0.1 -- Date: 28 July, 2022
+
 # M_Frontend
