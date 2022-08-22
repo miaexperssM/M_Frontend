@@ -1,8 +1,5 @@
 import produce from 'immer';
-import { find } from 'lodash';
 import {
-  GET_ORDERS_REQUEST,
-  GET_ORDERS_FAILURE,
   GET_ORDERS_SUCCESS,
   ADD_ORDER_REQUEST,
   ADD_ORDER_SUCCESS,
@@ -10,9 +7,6 @@ import {
   ADD_ORDER_LIST_REQUEST,
   ADD_ORDER_LIST_FAILURE,
   ADD_ORDER_LIST_SUCCESS,
-  DEL_ORDER_REQUEST,
-  DEL_ORDER_SUCCESS,
-  DEL_ORDER_FAILURE,
   MODIFY_ORDER_REQUEST,
   MODIFY_ORDER_SUCCESS,
   MODIFY_ORDER_FAILURE,
@@ -40,6 +34,7 @@ import {
   ON_CHANGE_DESCRIPTION,
   ON_CHANGE_QUANTITY,
   TRACK_ORDER_SUCCESS,
+  TRACK_ORDER_LIST_SUCCESS,
   ON_CHANGE_ADD_ORDER_STATUS,
   ON_CHANGE_ADD_ORDER_SUCCESS_NUMBER,
   ON_CHANGE_ADD_ORDER_FAIL_NUMBER,
@@ -91,6 +86,10 @@ const ordersReducer = (state = initialState, action) =>
         break;
       case TRACK_ORDER_SUCCESS:
         draft.trackOrder = action.payload.data;
+        break;
+      case TRACK_ORDER_LIST_SUCCESS:
+        draft.ordersList = action.payload;
+        console.log(action);
         break;
       case ADD_ORDER_REQUEST:
         draft.addOrderModalLoading = true;

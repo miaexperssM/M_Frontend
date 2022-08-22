@@ -5,6 +5,9 @@ import {
   TRACK_ORDER_REQUEST,
   TRACK_ORDER_SUCCESS,
   TRACK_ORDER_FAILURE,
+  TRACK_ORDER_LIST_REQUEST,
+  TRACK_ORDER_LIST_SUCCESS,
+  TRACK_ORDER_LIST_FAILURE,
   ADD_ORDER_REQUEST,
   ADD_ORDER_SUCCESS,
   ADD_ORDER_FAILURE,
@@ -55,6 +58,10 @@ export const getOrdersFailure = payload => ({ type: GET_ORDERS_FAILURE, payload 
 export const trackOrdersAction = payload => ({ type: TRACK_ORDER_REQUEST, payload });
 export const trackOrdersSuccess = payload => ({ type: TRACK_ORDER_SUCCESS, payload });
 export const trackOrdersFailure = payload => ({ type: TRACK_ORDER_FAILURE, payload });
+
+export const trackOrderListAction = payload => ({ type: TRACK_ORDER_LIST_REQUEST, payload });
+export const trackOrderListSuccess = payload => ({ type: TRACK_ORDER_LIST_SUCCESS, payload });
+export const trackOrderListFailure = payload => ({ type: TRACK_ORDER_LIST_FAILURE, payload });
 
 export const getOrdersByUpdatedAtAction = payload => ({ type: GET_ORDERS_UPDATED_AT_REQUEST, payload });
 export const getOrdersByUpdatedAtSuccess = payload => ({ type: GET_ORDERS_UPDATED_AT_SUCCESS, payload });

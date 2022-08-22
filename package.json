@@ -13,6 +13,7 @@
     "antd": "^4.15.4",
     "axios": "^0.19.0",
     "babel-plugin-import": "^1.13.0",
+    "barcode-react-scanner": "^1.2.0",
     "connected-react-router": "^6.6.1",
     "customize-cra": "^0.9.1",
     "dayjs": "^1.10.7",

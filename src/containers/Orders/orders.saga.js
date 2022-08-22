@@ -15,6 +15,8 @@ import {
   modifyOrdersFailure,
   trackOrdersFailure,
   trackOrdersSuccess,
+  trackOrderListFailure,
+  trackOrderListSuccess,
 } from './orders.actions';
 import {
   GET_ORDERS_REQUEST,
@@ -23,7 +25,7 @@ import {
   DEL_ORDER_REQUEST,
   TRACK_ORDER_REQUEST,
   ADD_ORDER_LIST_REQUEST,
-  GET_ORDERS_UPDATED_AT_SUCCESS,
+  TRACK_ORDER_LIST_REQUEST,
   GET_ORDERS_UPDATED_AT_REQUEST,
 } from './orders.constants';
 import {
@@ -85,6 +87,24 @@ export function* trackOrderSaga({ payload: trackingNumber }) {
   }
 }
 
+export function* trackOrderListSaga({ payload: trackingNumberList }) {
+  if (trackingNumberList.length !== 0) {
+    const list = [];
+    for (const number of trackingNumberList) {
+      try {
+        const order = yield call(getOrderByTrackingNumberAPI, { trackingNumber: number });
+        console.log(order);
+        list.push(order.data);
+      } catch (error) {
+        console.log('trackOrderListSaga error', error);
+      }
+    }
+    yield put(trackOrderListSuccess(list));
+  } else {
+    yield put(trackOrderListFailure());
+  }
+}
+
 export function* postOrderListSaga({ payload: list }) {
   if (list.payload.length !== 0) {
     for (const data of list.payload) {
@@ -92,7 +112,7 @@ export function* postOrderListSaga({ payload: list }) {
         const newOrder = yield call(postOrdersAPI, data);
         yield put(addOrderListSuccess(newOrder));
       } catch (error) {
-        console.log('postOrderListSaga errror', error);
+        console.log('postOrderListSaga error', error);
         yield put(addOrderListFailure(error));
       }
     }
@@ -216,6 +236,7 @@ export default function* usersSaga() {
   yield takeEvery(MODIFY_ORDER_REQUEST, putOrdersSaga);
   yield takeEvery(DEL_ORDER_REQUEST, delOrdersSaga);
   yield takeEvery(TRACK_ORDER_REQUEST, trackOrderSaga);
+  yield takeEvery(TRACK_ORDER_LIST_REQUEST, trackOrderListSaga);
   yield takeEvery(ADD_ORDER_LIST_REQUEST, postOrderListSaga);
   yield takeLatest(GET_ORDERS_UPDATED_AT_REQUEST, getOrdersByUpdatedAtSaga);
 }

@@ -42,6 +42,7 @@ import {
   onChangeAddOrderFailNumberAction,
   onChangeAddOrderStatusAction,
   getOrdersByUpdatedAtAction,
+  trackOrderListAction,
 } from './orders.actions';
 
 import {
@@ -83,8 +84,10 @@ import UploadStandardTemplateModal from './UploadStandardTemplateModal';
 import UploadSimpleTemplateModal from './UploadSimpleTemplateModal';
 import { getZonesAction } from 'containers/Zones/zones.actions';
 import { selectZonesList } from 'containers/Zones/zones.selectors';
+import BarCodeScanner from 'barcode-react-scanner';
 
 const key = 'orders';
+const { TextArea } = Input;
 
 const { RangePicker } = DatePicker;
 
@@ -107,6 +110,8 @@ function Orders(props) {
   const [uploadedSuccessful, setUploadedSuccessful] = React.useState(0);
   const [uploadingPercent, setUploadingPercent] = React.useState(100);
   const [datePickerRange, setDatePickerRange] = React.useState(undefined);
+  const [trackingNumberSearchArray, setTrackingNumberSearchArray] = React.useState([]);
+  const [isBarcodeScannerActive, setIsBarcodeScannerActive] = React.useState(false);
 
   async function getTrackOrder(trackingNumber) {
     setSearching(true);
@@ -119,6 +124,15 @@ function Orders(props) {
     } else {
       setDatePickerRange({ from: date[0].format(), to: date[1].format() });
     }
+  }
+
+  function onTrackingNumberInputChange(e) {
+    const array = e.target.value.split(/[.,!,?,\n, ]/);
+    setTrackingNumberSearchArray(array);
+  }
+
+  async function onSearchTrackingNumberList() {
+    props.getTrackOrderList(trackingNumberSearchArray);
   }
 
   const openNotificationWithIcon = type => {
@@ -210,17 +224,42 @@ function Orders(props) {
       <Tabs activeKey={tabsKey} onTabClick={setTabsKey}>
         <TabPane tab="Order Searching" key="1">
           <Row>
-            <Col span={24}>
+            <Col span={22}>
               <Input
                 onPressEnter={e => {
                   setDestinationAddress('');
                   setOrderDescription('');
-                  getTrackOrder(e.target.value);
+                  if (e.target.value !== '') {
+                    getTrackOrder(e.target.value);
+                  }
                 }}
                 value={inputTrackingNumber}
                 onChange={e => setInputTrackingNumber(e.target.value)}
-              ></Input>
+              />
             </Col>
+            <Col span={2}>
+              <Button
+                onClick={() => {
+                  setIsBarcodeScannerActive(!isBarcodeScannerActive);
+                  setInputTrackingNumber('');
+                }}
+                type={isBarcodeScannerActive ? 'ghost' : 'primary'}
+              >
+                Scan
+              </Button>
+            </Col>
+            {isBarcodeScannerActive ? (
+              <BarCodeScanner
+                onUpdate={(err, res) => {
+                  if (res) {
+                    setIsBarcodeScannerActive(false);
+                    setInputTrackingNumber(res.getText());
+                  }
+                }}
+              />
+            ) : (
+              <React.Fragment />
+            )}
           </Row>
           <Row style={{ marginTop: '20px' }}>
             <Col span={8}>
@@ -281,11 +320,31 @@ function Orders(props) {
         <TabPane tab="Orders Data" key="2">
           <ModifyOrderModal modifyingId={modifyingId} />
           <Row style={{ marginTop: '20px', marginBottom: '20px' }}>
-            <Col span={4}> Search by Update Date:</Col>
+            <Col span={3}> Search by Update Date:</Col>
             <Col span={6}>
               <RangePicker onChange={onDatePickerChange} format={'DD-MM-YYYY'} />
             </Col>
-            <Col span={4}>
+            <Col span={3}> Search by Tracking Number:</Col>
+            <Col span={8}>
+              <Input.Group compact>
+                <TextArea
+                  rows={5}
+                  style={{ width: 'calc(100% - 200px)' }}
+                  onChange={onTrackingNumberInputChange}
+                  value={trackingNumberSearchArray.toString()}
+                />
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    console.log(trackingNumberSearchArray);
+                    onSearchTrackingNumberList();
+                  }}
+                >
+                  Search
+                </Button>
+              </Input.Group>
+            </Col>
+            <Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <ExportToExcel
                 apiData={props.orderList}
                 notice={
@@ -317,9 +376,19 @@ function Orders(props) {
             setUploadingPercent={setUploadingPercent}
             setUploadingDataList={setUploadingDataList}
           />
-          <Row style={{ marginTop: '30px' }}>
+          <Row style={{ marginTop: '50px' }}>
             <Col span={3}>Standard Template</Col>
-            <Col span={21}>
+            <Col span={5}>
+              <Button>
+                <a
+                  href={'https://miaexpress-files.s3.ap-southeast-1.amazonaws.com/Import+template.xlsx'}
+                  download={'Standard_Template'}
+                >
+                  Download Template
+                </a>
+              </Button>
+            </Col>
+            <Col span={16}>
               <input type="file" id="xlsxStandardInput" accept=".xlsx" multiple={false} />
             </Col>
           </Row>
@@ -328,9 +397,19 @@ function Orders(props) {
             setUploadingPercent={setUploadingPercent}
             setUploadingDataList={setUploadingDataList}
           />
-          <Row style={{ marginTop: '30px' }}>
+          <Row style={{ marginTop: '50px' }}>
             <Col span={3}>Simple Template</Col>
-            <Col span={21}>
+            <Col span={5}>
+              <Button>
+                <a
+                  href="https://miaexpress-files.s3.ap-southeast-1.amazonaws.com/Simple+Template.xlsx"
+                  download={'Simple_Template'}
+                >
+                  Download Template
+                </a>
+              </Button>
+            </Col>
+            <Col span={16}>
               <input type="file" id="xlsxSimpleInput" accept=".xlsx" multiple={false} />
             </Col>
           </Row>
@@ -463,6 +542,7 @@ const mapDispatchToProps = dispatch => ({
   getOrders: payload => dispatch(getOrdersAction(payload)),
   getOrdersByUpdatedAt: date => dispatch(getOrdersByUpdatedAtAction(date)),
   getTrackOrder: trackingNumber => dispatch(trackOrdersAction(trackingNumber)),
+  getTrackOrderList: trackingNumberList => dispatch(trackOrderListAction(trackingNumberList)),
   delOrders: id => dispatch(delOrdersAction(id)),
   handleAddOrderModalShow: () => dispatch(handleAddOrderModalShowAction()),
   handleModifyOrderModalShow: () => dispatch(handleModifyOrderModalShowAction()),
