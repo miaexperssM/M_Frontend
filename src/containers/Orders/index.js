@@ -132,7 +132,11 @@ function Orders(props) {
   }
 
   async function onSearchTrackingNumberList() {
-    props.getTrackOrderList(trackingNumberSearchArray);
+    if (trackingNumberSearchArray.length === 0) {
+      props.getOrders({ offset: 1, limit: 3000 });
+    } else {
+      props.getTrackOrderList(trackingNumberSearchArray);
+    }
   }
 
   const openNotificationWithIcon = type => {
@@ -332,11 +336,11 @@ function Orders(props) {
                   style={{ width: 'calc(100% - 200px)' }}
                   onChange={onTrackingNumberInputChange}
                   value={trackingNumberSearchArray.toString()}
+                  allowClear
                 />
                 <Button
                   type="primary"
                   onClick={() => {
-                    console.log(trackingNumberSearchArray);
                     onSearchTrackingNumberList();
                   }}
                 >
