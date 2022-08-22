@@ -59,3 +59,15 @@
   2. Add order by excel speed up
 - Bug fix:
   1. Backend order entity expiredDate nullable
+
+## v2.1.0
+
+- RelaseDate: 2022.08.23
+- Feature:
+  1. add barcode scanner in search trackingNumber by camera
+  2. add search TrackingNumberList
+  3. add template download
+- Improvement:
+  1. UI/UX
+- Bug fix:
+  1. search "" in trackingNumber will trigger api call
