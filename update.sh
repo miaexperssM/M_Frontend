@@ -1,1 +1,1 @@
-git pull && npm install && npm run build
+git pull && yarn install && npm run build
