@@ -1,0 +1,15 @@
+export const GET_RULES_REQUEST = 'rules/GET_RULES_REQUEST';
+export const GET_RULES_SUCCESS = 'rules/GET_RULES_SUCCESS';
+export const GET_RULES_FAILURE = 'rules/GET_RULES_FAILURE';
+
+export const ADD_RULES_REQUEST = 'rules/ADD_RULES_REQUEST';
+export const ADD_RULES_SUCCESS = 'rules/ADD_RULES_SUCCESS';
+export const ADD_RULES_FAILURE = 'rules/ADD_RULES_FAILURE';
+
+export const DEL_RULES_REQUEST = 'rules/DEL_RULES_REQUEST';
+export const DEL_RULES_SUCCESS = 'rules/DEL_RULES_SUCCESS';
+export const DEL_RULES_FAILURE = 'rules/DEL_RULES_FAILURE';
+
+export const MODIFY_RULES_REQUEST = 'rules/MODIFY_RULES_REQUEST';
+export const MODIFY_RULES_SUCCESS = 'rules/MODIFY_RULES_SUCCESS';
+export const MODIFY_RULES_FAILURE = 'rules/MODIFY_RULES_FAILURE';

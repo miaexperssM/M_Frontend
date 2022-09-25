@@ -100,6 +100,7 @@ function Orders(props) {
   const [destinationAddress, setDestinationAddress] = React.useState('');
   const [orderDescription, setOrderDescription] = React.useState('');
   const [orderPlaceId, setOrderPlaceId] = React.useState('');
+  const [orderLngLat, setOrderLngLat] = React.useState();
   const [modifyingId, setModifyingId] = React.useState(0);
   const [files, setFiles] = React.useState([]);
   const [uploadingDataList, setUploadingDataList] = React.useState([]);
@@ -135,6 +136,7 @@ function Orders(props) {
     if (trackingNumberSearchArray.length === 0) {
       props.getOrders({ offset: 1, limit: 3000 });
     } else {
+      console.log(trackingNumberSearchArray);
       props.getTrackOrderList(trackingNumberSearchArray);
     }
   }
@@ -184,6 +186,22 @@ function Orders(props) {
       setOrderDescription(record.description);
       setInputTrackingNumber('');
       setOrderPlaceId(record.placeIdInGoogle);
+      if (record.location) {
+        const locationInfo = JSON.parse(record.location);
+        if (locationInfo) {
+          const lnglat = {
+            lng: locationInfo.Location.DisplayPosition.Longitude,
+            lat: locationInfo.Location.DisplayPosition.Latitude,
+          };
+          console.log(locationInfo);
+          setOrderLngLat(lnglat);
+        } else {
+          setOrderLngLat();
+        }
+      } else {
+        setOrderLngLat();
+      }
+
       setZoneResult(record.zone);
     } else {
       setDestinationAddress('');
@@ -242,7 +260,7 @@ function Orders(props) {
               />
             </Col>
             <Col span={2}>
-              <Button
+              {/* <Button
                 onClick={() => {
                   setIsBarcodeScannerActive(!isBarcodeScannerActive);
                   setInputTrackingNumber('');
@@ -250,7 +268,7 @@ function Orders(props) {
                 type={isBarcodeScannerActive ? 'ghost' : 'primary'}
               >
                 Scan
-              </Button>
+              </Button> */}
             </Col>
             {isBarcodeScannerActive ? (
               <BarCodeScanner
@@ -316,8 +334,16 @@ function Orders(props) {
             </div>
           )}
           <Row style={{ marginTop: '10px', display: 'flex', justifyContent: 'center' }}>
-            <Button disabled={orderPlaceId === ''}>
-              <Link to={`/zones?placeId=${orderPlaceId}`}>View Place In Map</Link>
+            <Button disabled={orderPlaceId === '' && orderLngLat == undefined}>
+              <Link
+                to={
+                  orderLngLat
+                    ? `/zones?lng=${orderLngLat.lng}&lat=${orderLngLat.lat}`
+                    : `/zones?placeId=${orderPlaceId}`
+                }
+              >
+                View Place In Map
+              </Link>
             </Button>
           </Row>
         </TabPane>

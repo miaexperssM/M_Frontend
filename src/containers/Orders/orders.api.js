@@ -14,6 +14,10 @@ export function getOrderByTrackingNumberAPI(payload) {
   return request.get(`v1/orders/track/${payload.trackingNumber}`);
 }
 
+export function postOrdersByTrackingNumberListAPI(payload) {
+  return request.post(`v1/orders/trackList`, { trackingNumberList: payload });
+}
+
 export function postOrdersAPI(payload) {
   return request.post('v1/addOrder', payload);
 }

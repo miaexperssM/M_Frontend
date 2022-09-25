@@ -32,6 +32,7 @@ import {
   getOrdersAPI,
   getOrdersByUpdatedAtAPI,
   getOrderByTrackingNumberAPI,
+  postOrdersByTrackingNumberListAPI,
   postOrdersAPI,
   putOrdersAPI,
   delOrdersAPI,
@@ -89,17 +90,15 @@ export function* trackOrderSaga({ payload: trackingNumber }) {
 
 export function* trackOrderListSaga({ payload: trackingNumberList }) {
   if (trackingNumberList.length !== 0) {
-    const list = [];
-    for (const number of trackingNumberList) {
-      try {
-        const order = yield call(getOrderByTrackingNumberAPI, { trackingNumber: number });
-        console.log(order);
-        list.push(order.data);
-      } catch (error) {
-        console.log('trackOrderListSaga error', error);
-      }
+    const list = trackingNumberList.map(trackingNumber => trackingNumber.toString());
+    try {
+      const orderList = yield call(postOrdersByTrackingNumberListAPI, list);
+      console.log(orderList);
+      yield put(trackOrderListSuccess(orderList));
+    } catch (error) {
+      console.log('trackOrderListSaga error', error);
+      yield put(trackOrderListFailure());
     }
-    yield put(trackOrderListSuccess(list));
   } else {
     yield put(trackOrderListFailure());
   }

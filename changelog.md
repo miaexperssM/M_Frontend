@@ -71,3 +71,16 @@
   1. UI/UX
 - Bug fix:
   1. search "" in trackingNumber will trigger api call
+
+## v2.2.0
+
+- RelaseDate: 2022.09.25
+- Feature:
+  1. add Rule for auto pick
+  2. add Backend check
+  3. add login by accountId
+  4. add post measure Data and Image
+- Improvement:
+  1. UI/UX
+  2. Temp Remove scan by camera
+  3. improve search TrackingNumberList

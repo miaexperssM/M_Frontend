@@ -88,7 +88,7 @@ const ordersReducer = (state = initialState, action) =>
         draft.trackOrder = action.payload.data;
         break;
       case TRACK_ORDER_LIST_SUCCESS:
-        draft.ordersList = action.payload;
+        draft.ordersList = action.payload.data;
         console.log(action);
         break;
       case ADD_ORDER_REQUEST:

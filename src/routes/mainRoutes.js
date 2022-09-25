@@ -1,17 +1,17 @@
 import Zones from 'containers/Zones';
 import SignIn from 'containers/SignIn';
 import SignUp from 'containers/SignUp';
-import NotFound from 'containers/NotFound';
+import BackendCheck from 'containers/BackendCheck';
 import SignOut from 'containers/SignOut';
 import Users from 'containers/Users';
 import Orders from 'containers/Orders';
+import Rules from 'containers/Rules';
 
 const mainRoutes = [
   {
     exact: true,
     path: '/',
     name: 'Home',
-    icon: 'home',
     component: Orders,
     auth: true,
   },
@@ -19,7 +19,6 @@ const mainRoutes = [
     exact: true,
     path: '/zones',
     name: 'Zone',
-    icon: 'zone',
     component: Zones,
     auth: true,
   },
@@ -27,14 +26,25 @@ const mainRoutes = [
     exact: true,
     path: '/orders',
     name: 'Order',
-    icon: 'order',
     component: Orders,
     auth: true,
   },
   {
+    exact: true,
+    path: '/rules',
+    name: 'Rule',
+    component: Rules,
+    auth: true,
+  },
+  {
+    path: '/backendCheck',
+    name: 'BackendCheck',
+    auth: true,
+    component: BackendCheck,
+  },
+  {
     path: '/signin',
     name: 'Sign In',
-    icon: 'login',
     component: SignIn,
   },
   {
@@ -56,19 +66,9 @@ const mainRoutes = [
     component: SignOut,
     auth: true,
   },
-
-  {
-    path: '',
-    name: 'Others',
-    icon: 'close-circle',
-    auth: true,
-    hide: true,
-    component: Zones,
-  },
   {
     path: '/zones/:location',
     name: 'zonesNavigate',
-    icon: 'close-circle',
     auth: true,
     hide: true,
     component: Zones,
