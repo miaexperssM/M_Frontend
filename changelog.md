@@ -84,3 +84,9 @@
   1. UI/UX
   2. Temp Remove scan by camera
   3. improve search TrackingNumberList
+
+## v2.2.1
+
+- RelaseDate: 2022.10.08
+- Improvement:
+  1. Change Map Service back to Google, continue using GeoCoding service to find place
