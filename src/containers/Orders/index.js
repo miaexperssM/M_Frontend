@@ -189,12 +189,15 @@ function Orders(props) {
       if (record.location) {
         const locationInfo = JSON.parse(record.location);
         if (locationInfo) {
-          const lnglat = {
-            lng: locationInfo.Location.DisplayPosition.Longitude,
-            lat: locationInfo.Location.DisplayPosition.Latitude,
-          };
-          console.log(locationInfo);
-          setOrderLngLat(lnglat);
+          if (locationInfo.Location && locationInfo.Location.DisplayPosition) {
+            const lnglat = {
+              lng: locationInfo.Location.DisplayPosition.Longitude || 0,
+              lat: locationInfo.Location.DisplayPosition.Latitude || 0,
+            };
+            setOrderLngLat(lnglat);
+          } else {
+            setOrderLngLat();
+          }
         } else {
           setOrderLngLat();
         }
