@@ -48,8 +48,8 @@ export const initialState = {
   modifyOrderModalVisible: false,
   modifyOrderModalLoading: false,
   addOrderState: undefined,
-  addOrderFailNumber: 0,
-  addOrderSuccessNumber: 0,
+  addOrderFailList: [],
+  addOrderSuccessList: [],
   trackorder: {},
   orderForm: {
     MAWB: '',
@@ -89,7 +89,6 @@ const ordersReducer = (state = initialState, action) =>
         break;
       case TRACK_ORDER_LIST_SUCCESS:
         draft.ordersList = action.payload.data;
-        console.log(action);
         break;
       case ADD_ORDER_REQUEST:
         draft.addOrderModalLoading = true;
@@ -108,19 +107,20 @@ const ordersReducer = (state = initialState, action) =>
         break;
       case ADD_ORDER_LIST_REQUEST:
         draft.addOrderModalLoading = true;
-        draft.addOrderFailNumber = 0;
-        draft.addOrderSuccessNumber = 0;
+        draft.addOrderFailList = [];
+        draft.addOrderSuccessList = [];
         break;
       case ADD_ORDER_LIST_SUCCESS:
         draft.addOrderModalLoading = false;
         draft.addOrderModalVisible = false;
         draft.ordersList = draft.ordersList.concat([action.payload.data]);
         draft.orderForm = initialState.orderForm;
-        draft.addOrderSuccessNumber += 1;
+        draft.addOrderSuccessList = draft.addOrderSuccessList.concat([action.payload.data]);
         break;
       case ADD_ORDER_LIST_FAILURE:
         draft.addOrderModalLoading = false;
-        draft.addOrderFailNumber += 1;
+        const order = JSON.parse(action.payload.config.data);
+        draft.addOrderFailList = draft.addOrderFailList.concat([order]);
         break;
       case MODIFY_ORDER_REQUEST:
         draft.modifyOrderModalLoading = true;

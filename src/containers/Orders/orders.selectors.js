@@ -12,8 +12,8 @@ const selectAddOrderModalVisible = createSelector(selectOrdersDomain, substate =
 const selectAddOrderModalLoading = createSelector(selectOrdersDomain, substate => substate.addOrderModalLoading);
 
 const selectAddOrderState = createSelector(selectOrdersDomain, substate => substate.addOrderState);
-const selectAddOrderSuccessNumber = createSelector(selectOrdersDomain, substate => substate.addOrderSuccessNumber);
-const selectAddOrderFailNumber = createSelector(selectOrdersDomain, substate => substate.addOrderFailNumber);
+const selectAddOrderSuccessList = createSelector(selectOrdersDomain, substate => substate.addOrderSuccessList);
+const selectAddOrderFailList = createSelector(selectOrdersDomain, substate => substate.addOrderFailList);
 
 const selectModifyOrderModalVisible = createSelector(selectOrdersDomain, substate => substate.modifyOrderModalVisible);
 const selectModifyOrderModalLoading = createSelector(selectOrdersDomain, substate => substate.modifyOrderModalLoading);
@@ -60,8 +60,8 @@ export {
   selectAddOrderModalVisible,
   selectAddOrderModalLoading,
   selectAddOrderState,
-  selectAddOrderSuccessNumber,
-  selectAddOrderFailNumber,
+  selectAddOrderSuccessList,
+  selectAddOrderFailList,
   selectModifyOrderModalVisible,
   selectModifyOrderModalLoading,
   selectTrackOrder,

@@ -7,8 +7,6 @@ import { compose } from 'redux';
 import { Row, Col, Button, Tabs, Input, Spin, Tag, notification, Progress, DatePicker } from 'antd';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
-import { ExportToExcel } from 'utils/exportToExcel';
-import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
 import {
   delOrdersAction,
@@ -74,22 +72,23 @@ import { makeSelectUser } from 'global.selectors';
 import {
   selectAddOrderState,
   selectTrackOrder,
-  selectAddOrderSuccessNumber,
-  selectAddOrderFailNumber,
+  selectAddOrderSuccessList,
+  selectAddOrderFailList,
 } from './orders.selectors';
 import AddOrderModal from './AddOrderModal';
 import ModifyOrderModal from './ModifyOrderModal';
 import OrdersTable from './OrdersTable';
+import UploadOrdersTable from './OrdersTable/uploadDataTable';
 import UploadStandardTemplateModal from './UploadStandardTemplateModal';
 import UploadSimpleTemplateModal from './UploadSimpleTemplateModal';
 import { getZonesAction } from 'containers/Zones/zones.actions';
 import { selectZonesList } from 'containers/Zones/zones.selectors';
 import BarCodeScanner from 'barcode-react-scanner';
+import SearchingModal from './SearchingModal';
+import { ExportToExcel } from 'utils/exportToExcel';
+import dayjs from 'dayjs';
 
 const key = 'orders';
-const { TextArea } = Input;
-
-const { RangePicker } = DatePicker;
 
 function Orders(props) {
   useInjectReducer({ key, reducer });
@@ -103,6 +102,7 @@ function Orders(props) {
   const [orderLngLat, setOrderLngLat] = React.useState();
   const [modifyingId, setModifyingId] = React.useState(0);
   const [files, setFiles] = React.useState([]);
+  const [isSearchVisiable, setIsSearchVisiable] = React.useState(false);
   const [uploadingDataList, setUploadingDataList] = React.useState([]);
   const [zoneResult, setZoneResult] = React.useState();
   const [inputTrackingNumber, setInputTrackingNumber] = React.useState('');
@@ -110,35 +110,11 @@ function Orders(props) {
   const [uploadedFailed, setUploadedFailed] = React.useState(0);
   const [uploadedSuccessful, setUploadedSuccessful] = React.useState(0);
   const [uploadingPercent, setUploadingPercent] = React.useState(100);
-  const [datePickerRange, setDatePickerRange] = React.useState(undefined);
-  const [trackingNumberSearchArray, setTrackingNumberSearchArray] = React.useState([]);
   const [isBarcodeScannerActive, setIsBarcodeScannerActive] = React.useState(false);
 
   async function getTrackOrder(trackingNumber) {
     setSearching(true);
     await props.getTrackOrder(trackingNumber);
-  }
-
-  function onDatePickerChange(date, dateString) {
-    if (date === null) {
-      setDatePickerRange(undefined);
-    } else {
-      setDatePickerRange({ from: date[0].format(), to: date[1].format() });
-    }
-  }
-
-  function onTrackingNumberInputChange(e) {
-    const array = e.target.value.split(/[.,!,?,\n, ]/);
-    setTrackingNumberSearchArray(array);
-  }
-
-  async function onSearchTrackingNumberList() {
-    if (trackingNumberSearchArray.length === 0) {
-      props.getOrders({ offset: 1, limit: 3000 });
-    } else {
-      console.log(trackingNumberSearchArray);
-      props.getTrackOrderList(trackingNumberSearchArray);
-    }
   }
 
   const openNotificationWithIcon = type => {
@@ -166,15 +142,6 @@ function Orders(props) {
       await openNotificationWithIcon('error');
     }
   };
-
-  useEffect(() => {
-    console.log('search order updatedAt', datePickerRange);
-    if (datePickerRange) {
-      props.getOrdersByUpdatedAt(datePickerRange);
-    } else {
-      props.getOrders({ offset: 1, limit: 3000 });
-    }
-  }, [datePickerRange]);
 
   useEffect(() => {
     console.log('track', props.trackOrder);
@@ -220,22 +187,28 @@ function Orders(props) {
 
   useEffect(() => {
     if (uploadingDataList.length !== 0) {
-      setUploadingPercent(((props.addOrderSuccessNumber + props.addOrderFailNumber) / uploadingDataList.length) * 100);
-      if (props.addOrderSuccessNumber + props.addOrderFailNumber === uploadingDataList.length) {
+      setUploadingPercent(
+        ((props.addOrderSuccessList.length + props.addOrderFailList.length) / uploadingDataList.length) * 100,
+      );
+      if (props.addOrderSuccessList.length + props.addOrderFailList.length === uploadingDataList.length) {
         document.getElementById('xlsxSimpleInput').value = '';
         document.getElementById('xlsxStandardInput').value = '';
-        if (props.addOrderFailNumber) {
+        if (props.addOrderFailList.length !== 0) {
           onUploadResult(false);
         }
       }
     }
-  }, [props.addOrderFailNumber, props.addOrderSuccessNumber, uploadingDataList]);
+  }, [props.addOrderFailList.length, props.addOrderSuccessList.length, uploadingDataList]);
 
   useEffect(() => {
     props.onChangeAddOrderFailNumber(0);
     props.onChangeAddOrderSuccessNumber(0);
     props.onChangeAddOrderStatus(undefined);
   }, [uploadingDataList]);
+
+  useEffect(() => {
+    props.getOrders({ offset: 1, limit: 3000 });
+  }, []);
 
   return (
     <>
@@ -352,37 +325,21 @@ function Orders(props) {
         </TabPane>
         <TabPane tab="Orders Data" key="2">
           <ModifyOrderModal modifyingId={modifyingId} />
+          <SearchingModal isVisiable={isSearchVisiable} setIsVisiable={setIsSearchVisiable} />
           <Row style={{ marginTop: '20px', marginBottom: '20px' }}>
-            <Col span={3}> Search by Update Date:</Col>
-            <Col span={6}>
-              <RangePicker onChange={onDatePickerChange} format={'DD-MM-YYYY'} />
+            <Col span={3} style={{ display: 'flex', justifyContent: 'center' }}>
+              <Button
+                onClick={() => {
+                  setIsSearchVisiable(!isSearchVisiable);
+                }}
+              >
+                Search
+              </Button>
             </Col>
-            <Col span={3}> Search by Tracking Number:</Col>
-            <Col span={8}>
-              <Input.Group compact>
-                <TextArea
-                  rows={5}
-                  style={{ width: 'calc(100% - 200px)' }}
-                  onChange={onTrackingNumberInputChange}
-                  value={trackingNumberSearchArray.toString()}
-                  allowClear
-                />
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    onSearchTrackingNumberList();
-                  }}
-                >
-                  Search
-                </Button>
-              </Input.Group>
-            </Col>
-            <Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Col span={3} style={{ display: 'flex', justifyContent: 'center' }}>
               <ExportToExcel
                 apiData={props.orderList}
-                notice={
-                  datePickerRange === undefined ? 'All Data' : 'Only export data that updated at left search date'
-                }
+                notice={'Export Data in the table'}
                 fileName={`OrderExport_${dayjs().format('YYYY-MM-DD_hh-mm-ss')}`}
               />
             </Col>
@@ -481,8 +438,11 @@ function Orders(props) {
                 Upload
               </Button>
             </Col>
-            <Col span={5}>Upload Successful: {props.addOrderSuccessNumber}</Col>
-            <Col span={5}>Upload Failed: {props.addOrderFailNumber}</Col>
+            <Col span={5}>Upload Successful: {props.addOrderSuccessList.length}</Col>
+            <Col span={5}>Upload Failed: {props.addOrderFailList.length}</Col>
+          </Row>
+          <Row>
+            <UploadOrdersTable />
           </Row>
         </TabPane>
       </Tabs>
@@ -547,8 +507,8 @@ const mapStateToProps = createStructuredSelector({
   orderList: selectOrdersList,
   zonesList: selectZonesList,
   addOrderState: selectAddOrderState,
-  addOrderFailNumber: selectAddOrderFailNumber,
-  addOrderSuccessNumber: selectAddOrderSuccessNumber,
+  addOrderFailList: selectAddOrderFailList,
+  addOrderSuccessList: selectAddOrderSuccessList,
   MAWB: makeSelectMAWB,
   containerNumber: makeSelectContainerNumber,
   trackingNumber: makeSelectTrackingNumber,

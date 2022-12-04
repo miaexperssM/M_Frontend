@@ -49,65 +49,73 @@ import {
   onChangeQuantityAction,
   addOrdersAction,
 } from '../orders.actions';
+import { notification } from 'antd';
 
 function UploadSimpleTemplateModal(props) {
   async function readFile() {
-    let isDetailInfoSheet;
-    const input = document.getElementById('xlsxSimpleInput');
-    input.addEventListener('change', () => {
-      if (input.files.length !== 0) {
-        const dataList = [];
-        props.setUploadingPercent(0);
-        props.setFiles(input.files);
-        readXlsxFile(input.files[0], { getSheets: true }).then(sheets => {
-          console.log(sheets);
-          isDetailInfoSheet = sheets.find(sheet => sheet === 'Detail info') !== undefined ? true : false;
-        });
-        console.log(input.files.length, isDetailInfoSheet);
+    try {
+      let isDetailInfoSheet;
+      const input = document.getElementById('xlsxSimpleInput');
+      input.addEventListener('change', () => {
+        if (input.files.length !== 0) {
+          const dataList = [];
+          props.setUploadingPercent(0);
+          props.setFiles(input.files);
+          readXlsxFile(input.files[0], { getSheets: true }).then(sheets => {
+            console.log(sheets);
+            isDetailInfoSheet = sheets.find(sheet => sheet === 'Detail info') !== undefined ? true : false;
+          });
+          console.log(input.files.length, isDetailInfoSheet);
 
-        readXlsxFile(input.files[0], { sheet: 'Detail info' }).then(async rows => {
-          for (let index = 0; index < rows.length; index++) {
-            props.setUploadingPercent(Math.ceil(index / rows.length) * 100);
+          readXlsxFile(input.files[0], { sheet: 'Detail info' }).then(async rows => {
+            for (let index = 0; index < rows.length; index++) {
+              props.setUploadingPercent(Math.ceil(index / rows.length) * 100);
 
-            if (index === 1) {
-              if (rows[index].length !== 8) {
-                return;
+              if (index === 1) {
+                if (rows[index].length !== 8) {
+                  return;
+                }
+              }
+              if (index >= 2) {
+                const row = rows[index];
+                const data = {
+                  MAWB: '',
+                  containerNumber: '',
+                  trackingNumber: excelDataTransfer.stringTrans(row[0]),
+                  shipper: '',
+                  shipperPhoneNumber: '',
+                  shipperAddress: '',
+                  destinationCountry: excelDataTransfer.stringTrans(row[1]),
+                  recipient: excelDataTransfer.stringTrans(row[2]),
+                  RUT: '',
+                  recipientPhoneNumber: excelDataTransfer.stringTrans(row[3]),
+                  recipientEmail: '',
+                  region: excelDataTransfer.stringTrans(row[4]),
+                  province: excelDataTransfer.stringTrans(row[5]),
+                  comuna: excelDataTransfer.stringTrans(row[6]),
+                  address: excelDataTransfer.stringTrans(row[7]),
+                  weight: 0,
+                  value: 0,
+                  description: '',
+                  quantity: 0,
+                };
+                dataList.push(data);
               }
             }
-            if (index >= 2) {
-              const row = rows[index];
-              const data = {
-                MAWB: '',
-                containerNumber: '',
-                trackingNumber: excelDataTransfer.stringTrans(row[0]),
-                shipper: '',
-                shipperPhoneNumber: '',
-                shipperAddress: '',
-                destinationCountry: excelDataTransfer.stringTrans(row[1]),
-                recipient: excelDataTransfer.stringTrans(row[2]),
-                RUT: '',
-                recipientPhoneNumber: excelDataTransfer.stringTrans(row[3]),
-                recipientEmail: '',
-                region: excelDataTransfer.stringTrans(row[4]),
-                province: excelDataTransfer.stringTrans(row[5]),
-                comuna: excelDataTransfer.stringTrans(row[6]),
-                address: excelDataTransfer.stringTrans(row[7]),
-                weight: 0,
-                value: 0,
-                description: '',
-                quantity: 0,
-              };
-              dataList.push(data);
-            }
-          }
-          props.setUploadingDataList(dataList);
-        });
-      } else {
-        props.setUploadingPercent(100);
-        props.setFiles([]);
-        props.setUploadingDataList([]);
-      }
-    });
+            props.setUploadingDataList(dataList);
+          });
+        } else {
+          props.setUploadingPercent(100);
+          props.setFiles([]);
+          props.setUploadingDataList([]);
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      notification['error']({
+        message: 'Format Error, please check uploaded file',
+      });
+    }
   }
 
   React.useEffect(() => {

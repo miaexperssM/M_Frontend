@@ -90,3 +90,10 @@
 - RelaseDate: 2022.10.08
 - Improvement:
   1. Change Map Service back to Google, continue using GeoCoding service to find place
+
+## v2.3.0
+
+- RelaseDate: 2022.12.04
+- Improvement:
+  1. Order Data uploading
+  2. Order Data exporting

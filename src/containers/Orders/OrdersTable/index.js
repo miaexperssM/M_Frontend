@@ -108,6 +108,21 @@ function OrdersTable(props) {
       key: 'address',
     },
     {
+      title: 'Height',
+      dataIndex: 'height',
+      key: 'height',
+    },
+    {
+      title: 'Length',
+      dataIndex: 'length',
+      key: 'length',
+    },
+    {
+      title: 'Width',
+      dataIndex: 'width',
+      key: 'width',
+    },
+    {
       title: 'Weight',
       dataIndex: 'weight',
       key: 'weight',
