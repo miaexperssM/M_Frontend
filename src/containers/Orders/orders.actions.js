@@ -49,6 +49,7 @@ import {
   ON_CHANGE_ADD_ORDER_STATUS,
   ON_CHANGE_ADD_ORDER_SUCCESS_NUMBER,
   ON_CHANGE_ADD_ORDER_FAIL_NUMBER,
+  ON_CHANGE_ISLOADING,
 } from './orders.constants';
 
 export const getOrdersAction = payload => ({ type: GET_ORDERS_REQUEST, payload });
@@ -88,6 +89,8 @@ export const handleAddOrderModalCancelAction = payload => ({ type: HANDLE_ADD_OR
 
 export const handleModifyOrderModalShowAction = payload => ({ type: HANDLE_MODIFY_ORDER_MODAL_SHOW, payload });
 export const handleModifyOrderModalCancelAction = payload => ({ type: HANDLE_MODIFY_ORDER_MODAL_CANCEL, payload });
+
+export const onChangeIsLoadingAction = payload => ({ type: ON_CHANGE_ISLOADING, payload });
 
 export const onChangeMAWBAction = payload => ({ type: ON_CHANGE_MAWB, payload });
 export const onChangeContainerNumberAction = payload => ({ type: ON_CHANGE_CONTAINER_NUMBER, payload });

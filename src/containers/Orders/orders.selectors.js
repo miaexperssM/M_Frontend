@@ -8,6 +8,8 @@ const selectOrdersList = createSelector(selectOrdersDomain, substate => {
   return sortBy(substate.ordersList, ['id'], ['desc']);
 });
 
+const selectOrdesIsLoading = createSelector(selectOrdersDomain, substate => substate.isLoading);
+
 const selectAddOrderModalVisible = createSelector(selectOrdersDomain, substate => substate.addOrderModalVisible);
 const selectAddOrderModalLoading = createSelector(selectOrdersDomain, substate => substate.addOrderModalLoading);
 
@@ -56,6 +58,7 @@ const makeSelectOrdersById = id =>
 
 export {
   selectOrdersDomain,
+  selectOrdesIsLoading,
   selectOrdersList,
   selectAddOrderModalVisible,
   selectAddOrderModalLoading,

@@ -39,9 +39,19 @@ import {
   ON_CHANGE_ADD_ORDER_SUCCESS_NUMBER,
   ON_CHANGE_ADD_ORDER_FAIL_NUMBER,
   GET_ORDERS_UPDATED_AT_SUCCESS,
+  GET_ORDERS_REQUEST,
+  GET_ORDERS_FAILURE,
+  GET_ORDERS_UPDATED_AT_REQUEST,
+  GET_ORDERS_UPDATED_AT_FAILURE,
+  TRACK_ORDER_REQUEST,
+  TRACK_ORDER_FAILURE,
+  TRACK_ORDER_LIST_FAILURE,
+  TRACK_ORDER_LIST_REQUEST,
+  ON_CHANGE_ISLOADING,
 } from './orders.constants';
 
 export const initialState = {
+  isLoading: false,
   ordersList: [],
   addOrderModalVisible: false,
   addOrderModalLoading: false,
@@ -78,18 +88,53 @@ export const initialState = {
 const ordersReducer = (state = initialState, action) =>
   produce(state, draft => {
     switch (action.type) {
+      case GET_ORDERS_REQUEST:
+        draft.isLoading = true;
+        break;
       case GET_ORDERS_SUCCESS:
         draft.ordersList = action.payload.data;
+        draft.isLoading = false;
+        break;
+      case GET_ORDERS_FAILURE:
+        draft.ordersList = [];
+        draft.isLoading = false;
+        break;
+
+      case GET_ORDERS_UPDATED_AT_REQUEST:
+        draft.isLoading = true;
         break;
       case GET_ORDERS_UPDATED_AT_SUCCESS:
         draft.ordersList = action.payload.data;
+        draft.isLoading = false;
+        break;
+      case GET_ORDERS_UPDATED_AT_FAILURE:
+        draft.ordersList = [];
+        draft.isLoading = false;
+        break;
+
+      case TRACK_ORDER_REQUEST:
+        draft.isLoading = true;
         break;
       case TRACK_ORDER_SUCCESS:
         draft.trackOrder = action.payload.data;
+        draft.isLoading = false;
+        break;
+      case TRACK_ORDER_FAILURE:
+        draft.isLoading = false;
+        break;
+
+      case TRACK_ORDER_LIST_REQUEST:
+        draft.isLoading = true;
         break;
       case TRACK_ORDER_LIST_SUCCESS:
         draft.ordersList = action.payload.data;
+        draft.isLoading = false;
         break;
+      case TRACK_ORDER_LIST_FAILURE:
+        draft.ordersList = [];
+        draft.isLoading = false;
+        break;
+
       case ADD_ORDER_REQUEST:
         draft.addOrderModalLoading = true;
         draft.addOrderState = undefined;
@@ -105,10 +150,12 @@ const ordersReducer = (state = initialState, action) =>
         draft.addOrderModalLoading = false;
         draft.addOrderState = false;
         break;
+
       case ADD_ORDER_LIST_REQUEST:
         draft.addOrderModalLoading = true;
         draft.addOrderFailList = [];
         draft.addOrderSuccessList = [];
+        draft.isLoading = true;
         break;
       case ADD_ORDER_LIST_SUCCESS:
         draft.addOrderModalLoading = false;
@@ -116,12 +163,15 @@ const ordersReducer = (state = initialState, action) =>
         draft.ordersList = draft.ordersList.concat([action.payload.data]);
         draft.orderForm = initialState.orderForm;
         draft.addOrderSuccessList = draft.addOrderSuccessList.concat([action.payload.data]);
+        draft.isLoading = false;
         break;
       case ADD_ORDER_LIST_FAILURE:
         draft.addOrderModalLoading = false;
         const order = JSON.parse(action.payload.config.data);
         draft.addOrderFailList = draft.addOrderFailList.concat([order]);
+        draft.isLoading = false;
         break;
+
       case MODIFY_ORDER_REQUEST:
         draft.modifyOrderModalLoading = true;
         break;
@@ -132,6 +182,7 @@ const ordersReducer = (state = initialState, action) =>
         break;
       case MODIFY_ORDER_FAILURE:
         draft.modifyOrderModalLoading = false;
+
       case HANDLE_ADD_ORDER_MODAL_SHOW:
         draft.addOrderModalVisible = true;
         break;
@@ -140,6 +191,7 @@ const ordersReducer = (state = initialState, action) =>
         draft.addOrderModalVisible = false;
         draft.orderForm = initialState.orderForm;
         break;
+
       case HANDLE_MODIFY_ORDER_MODAL_SHOW:
         draft.modifyOrderModalVisible = true;
         break;
@@ -148,6 +200,11 @@ const ordersReducer = (state = initialState, action) =>
         draft.modifyOrderModalVisible = false;
         draft.orderForm = initialState.orderForm;
         break;
+
+      case ON_CHANGE_ISLOADING:
+        draft.isLoading = action.payload;
+        break;
+
       case ON_CHANGE_MAWB:
         draft.orderForm.MAWB = action.payload;
         break;
@@ -205,7 +262,6 @@ const ordersReducer = (state = initialState, action) =>
       case ON_CHANGE_QUANTITY:
         draft.orderForm.quantity = action.payload;
         break;
-
       case ON_CHANGE_ADD_ORDER_STATUS:
         draft.addOrderState = action.payload;
         break;

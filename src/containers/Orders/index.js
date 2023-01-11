@@ -15,6 +15,7 @@ import {
   handleModifyOrderModalShowAction,
   modifyOrdersAction,
   trackOrdersAction,
+  onChangeIsLoadingAction,
   onChangeMAWBAction,
   onChangeContainerNumberAction,
   onChangeTrackingNumberAction,
@@ -64,6 +65,7 @@ import {
   makeSelectDescription,
   makeSelectQuantity,
   selectOrdersList,
+  selectOrdesIsLoading,
 } from './orders.selectors';
 
 import reducer from './orders.reducer';
@@ -111,6 +113,7 @@ function Orders(props) {
   const [uploadedSuccessful, setUploadedSuccessful] = React.useState(0);
   const [uploadingPercent, setUploadingPercent] = React.useState(100);
   const [isBarcodeScannerActive, setIsBarcodeScannerActive] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   async function getTrackOrder(trackingNumber) {
     setSearching(true);
@@ -207,8 +210,8 @@ function Orders(props) {
   }, [uploadingDataList]);
 
   useEffect(() => {
-    props.getOrders({ offset: 1, limit: 3000 });
-  }, []);
+    setIsLoading(props.isLoading);
+  }, [props.isLoading]);
 
   return (
     <>
@@ -234,17 +237,6 @@ function Orders(props) {
                 value={inputTrackingNumber}
                 onChange={e => setInputTrackingNumber(e.target.value)}
               />
-            </Col>
-            <Col span={2}>
-              {/* <Button
-                onClick={() => {
-                  setIsBarcodeScannerActive(!isBarcodeScannerActive);
-                  setInputTrackingNumber('');
-                }}
-                type={isBarcodeScannerActive ? 'ghost' : 'primary'}
-              >
-                Scan
-              </Button> */}
             </Col>
             {isBarcodeScannerActive ? (
               <BarCodeScanner
@@ -338,6 +330,7 @@ function Orders(props) {
             </Col>
             <Col span={3} style={{ display: 'flex', justifyContent: 'center' }}>
               <ExportToExcel
+                setIsLoading={setIsLoading}
                 apiData={props.orderList}
                 notice={'Export Data in the table'}
                 fileName={`OrderExport_${dayjs().format('YYYY-MM-DD_hh-mm-ss')}`}
@@ -347,6 +340,7 @@ function Orders(props) {
           <Row style={{ width: '100%', overflowX: 'scroll' }}>
             <Col span={24}>
               <OrdersTable
+                isLoading={isLoading}
                 onModifyOrder={props.handleModifyOrderModalShow}
                 setModifyingId={setModifyingId}
                 delOrders={id => props.delOrders(id)}
@@ -503,6 +497,7 @@ Orders.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   user: makeSelectUser(),
+  isLoading: selectOrdesIsLoading,
   trackOrder: selectTrackOrder,
   orderList: selectOrdersList,
   zonesList: selectZonesList,
@@ -543,6 +538,8 @@ const mapDispatchToProps = dispatch => ({
 
   addOrders: () => dispatch(addOrdersAction()),
   addOrderList: list => dispatch(addOrderListAction(list)),
+
+  onChangeIsLoading: e => dispatch(onChangeIsLoadingAction(e)),
   onChangeMAWB: e => dispatch(onChangeMAWBAction(e)),
   onChangeContainerNumber: e => dispatch(onChangeContainerNumberAction(e)),
   onChangeTrackingNumber: e => dispatch(onChangeTrackingNumberAction(e)),

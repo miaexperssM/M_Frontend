@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { selectOrdersList } from '../orders.selectors';
+import { selectOrdersList, selectOrdesIsLoading } from '../orders.selectors';
 import { makeSelectUser } from 'global.selectors';
 import { getOrdersAction, getOrdersByUpdatedAtAction, trackOrderListAction } from '../orders.actions';
 import { Modal, Row, Col, Button, Tabs, Input, Spin, Tag, notification, Progress, DatePicker } from 'antd';
@@ -18,6 +18,10 @@ function SearchingModal(props) {
   const [trackingNumberSearchArray, setTrackingNumberSearchArray] = React.useState([]);
   const [datePickerRange, setDatePickerRange] = React.useState(undefined);
   const [searchResultNumber, setSearchResultNumber] = React.useState(undefined);
+
+  React.useEffect(() => {
+    setIsLoading(props.isLoading);
+  }, [props.isLoading]);
 
   function onDatePickerChange(date, dateString) {
     if (date === null) {
@@ -74,6 +78,27 @@ function SearchingModal(props) {
         props.setIsVisiable(false);
       }}
     >
+      {isLoading ? (
+        <div
+          style={{
+            display: 'flex',
+            position: 'absolute',
+            width: '95%',
+            height: '60%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            zIndex: 99,
+            backgroundColor: 'lightgrey',
+            opacity: 0.85,
+          }}
+        >
+          <Spin />
+          Loading
+        </div>
+      ) : (
+        <React.Fragment />
+      )}
       <Row style={{ marginTop: '20px', marginBottom: '20px' }}>
         <Col span={12}>
           <Row>Search by Update Date:</Row>
@@ -136,6 +161,7 @@ function SearchingModal(props) {
 }
 
 SearchingModal.propTypes = {
+  isLoading: PropTypes.bool,
   ordersList: PropTypes.array,
   isVisiable: PropTypes.bool,
   setIsVisiable: PropTypes.func,
@@ -143,6 +169,7 @@ SearchingModal.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   ordersList: selectOrdersList,
+  isLoading: selectOrdesIsLoading,
   user: makeSelectUser(),
 });
 

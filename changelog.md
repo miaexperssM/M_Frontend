@@ -97,3 +97,13 @@
 - Improvement:
   1. Order Data uploading
   2. Order Data exporting
+
+## v2.4.0
+
+- RelaseDate: 2023.01.11
+- Improvement:
+  1. Backend add AutoSuggest before SearchAddress
+  2. Add loading status in order searching
+  3. Export data function enhancement
+  4. Cancel default order loading
+  5. orderGetByUpdatedAt max order from 5k to 10k

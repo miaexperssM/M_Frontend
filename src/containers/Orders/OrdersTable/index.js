@@ -241,10 +241,11 @@ function OrdersTable(props) {
   /* ------------------ */
   /* -     Render     - */
   /* ------------------ */
-  return <Table dataSource={props.ordersList} columns={columns} style={{ width: '120vw' }} />;
+  return <Table dataSource={props.ordersList} columns={columns} style={{ width: '120vw' }} loading={props.isLoading} />;
 }
 
 OrdersTable.propTypes = {
+  isLoading: PropTypes.bool,
   ordersList: PropTypes.array,
   onDeleteOrder: PropTypes.func,
   onModifyOrderModalShow: PropTypes.func,
