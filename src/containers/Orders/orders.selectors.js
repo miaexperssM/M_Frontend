@@ -47,6 +47,10 @@ const makeSelectProvince = createSelector(selectOrdersDomain, substate => substa
 const makeSelectComuna = createSelector(selectOrdersDomain, substate => substate.orderForm.comuna);
 const makeSelectAddress = createSelector(selectOrdersDomain, substate => substate.orderForm.address);
 const makeSelectWeight = createSelector(selectOrdersDomain, substate => substate.orderForm.weight);
+const makeSelectHeight = createSelector(selectOrdersDomain, substate => substate.orderForm.height);
+const makeSelectLength = createSelector(selectOrdersDomain, substate => substate.orderForm.length);
+const makeSelectWidth = createSelector(selectOrdersDomain, substate => substate.orderForm.width);
+
 const makeSelectValue = createSelector(selectOrdersDomain, substate => substate.orderForm.value);
 const makeSelectDescription = createSelector(selectOrdersDomain, substate => substate.orderForm.description);
 const makeSelectQuantity = createSelector(selectOrdersDomain, substate => substate.orderForm.quantity);
@@ -84,6 +88,9 @@ export {
   makeSelectComuna,
   makeSelectAddress,
   makeSelectWeight,
+  makeSelectHeight,
+  makeSelectLength,
+  makeSelectWidth,
   makeSelectValue,
   makeSelectDescription,
   makeSelectQuantity,

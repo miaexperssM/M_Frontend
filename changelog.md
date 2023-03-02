@@ -107,3 +107,16 @@
   3. Export data function enhancement
   4. Cancel default order loading
   5. orderGetByUpdatedAt max order from 5k to 10k
+
+## v2.5.0
+
+- RelaseDate: 2023.03.02
+- Improvement:
+  1. After uploading orders, show the mapping accuracy, zone info
+  2. If mapping accuracy is below than 85, show error with warning
+  3. User can select zone in uploading table or orders load tabel
+  4. Auto select/manual select zone mode should show in API call and Code Scan
+  5. Order detail will be moved to edit modal
+  6. App backend API to receive the orders uploading
+  7. Device captured image could be shown in data loading table
+  8. Rules table page refinement to avoid cannot show or edit

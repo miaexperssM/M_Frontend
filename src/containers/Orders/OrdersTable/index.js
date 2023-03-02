@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { Table, Button, Popconfirm } from 'antd';
+import { Table, Button, Popconfirm, Select } from 'antd';
 import { selectOrdersList } from '../orders.selectors';
 import {
   handleModifyOrderModalCancelAction,
@@ -23,70 +23,44 @@ import {
   onChangeComunaAction,
   onChangeAddressAction,
   onChangeWeightAction,
+  onChangeHeightAction,
+  onChangeLengthAction,
   onChangeValueAction,
   onChangeDescriptionAction,
   onChangeQuantityAction,
   modifyOrdersAction,
   delOrdersAction,
   getOrdersAction,
+  onChangeWidthAction,
 } from '../orders.actions';
 import { Admin } from 'utils/enum';
 import { makeSelectUser } from 'global.selectors';
 import { Link } from 'react-router-dom';
+import { getZonesAPI } from 'containers/Zones/zones.api';
+import { putOrdersWithZoneIdAPI } from 'containers/Orders/orders.api';
 
 function OrdersTable(props) {
+  const [zonesList, setZonesList] = React.useState([]);
+  const [ordersList, setOrdersList] = React.useState(props.ordersList);
+
+  const zoneListMemo = React.useMemo(() => {
+    const list = zonesList.map(zone => {
+      return { id: zone.id, title: zone.title };
+    });
+    return list;
+  }, [zonesList]);
   /* ------------------ */
   /* -     Const     - */
   /* ------------------ */
   const columns = [
     {
-      title: 'MAWB',
-      dataIndex: 'MAWB',
-      key: 'MAWB',
-    },
-    {
-      title: 'Container Num',
-      dataIndex: 'containerNumber',
-      key: 'containerNumber',
-    },
-    {
       title: 'Tracking Num',
       dataIndex: 'trackingNumber',
       key: 'trackingNumber',
+      fixed: 'left',
+      width: 100,
     },
-    { title: 'Shipper', dataIndex: 'shipper', key: 'shipper' },
-    {
-      title: 'Shipper Phone Num ',
-      dataIndex: 'shipperPhoneNumber',
-      key: 'shipperPhoneNumber',
-    },
-    {
-      title: 'Shipper Address',
-      dataIndex: 'shipperAddress',
-      key: 'shipperAddress',
-    },
-
     { title: 'Destination Country', dataIndex: 'destinationCountry', key: 'destinationCountry' },
-    {
-      title: 'Recipient',
-      dataIndex: 'recipient',
-      key: 'recipient',
-    },
-    {
-      title: 'RUT',
-      dataIndex: 'RUT',
-      key: 'RUT',
-    },
-    {
-      title: 'Recipient Phone Num',
-      dataIndex: 'recipientPhoneNumber',
-      key: 'recipientPhoneNumber',
-    },
-    {
-      title: 'Recipient Email',
-      dataIndex: 'recipientEmail',
-      key: 'recipientEmail',
-    },
     {
       title: 'Region',
       dataIndex: 'region',
@@ -108,41 +82,6 @@ function OrdersTable(props) {
       key: 'address',
     },
     {
-      title: 'Height',
-      dataIndex: 'height',
-      key: 'height',
-    },
-    {
-      title: 'Length',
-      dataIndex: 'length',
-      key: 'length',
-    },
-    {
-      title: 'Width',
-      dataIndex: 'width',
-      key: 'width',
-    },
-    {
-      title: 'Weight',
-      dataIndex: 'weight',
-      key: 'weight',
-    },
-    {
-      title: 'Value',
-      dataIndex: 'value',
-      key: 'value',
-    },
-    {
-      title: 'Item Description',
-      dataIndex: 'description',
-      key: 'description',
-    },
-    {
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      key: 'quantity',
-    },
-    {
       title: 'Update Date',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
@@ -153,22 +92,44 @@ function OrdersTable(props) {
       },
     },
     {
+      title: 'Zone',
+      dataIndex: 'zoneId',
+      key: 'changeZoneId',
+      render: (value, record) => renderChangeZoneSelection(value, record),
+      fixed: 'right',
+      width: 150,
+    },
+    {
+      title: 'Scan Image',
+      dataIndex: 'Scan Image',
+      key: 'scanImage',
+      render: (value, record) => renderImageButton(value, record),
+      fixed: 'right',
+      width: 100,
+    },
+    {
       title: 'Search',
       dataIndex: 'search',
       key: 'search',
       render: (value, record) => renderSearchButton(value, record),
+      fixed: 'right',
+      width: 100,
     },
     {
       title: 'Edit',
       dataIndex: 'edit',
       key: 'edit',
       render: (value, record) => renderEditButton(value, record),
+      fixed: 'right',
+      width: 100,
     },
     {
       title: 'Delete',
       dataIndex: 'delete',
       key: 'delete',
       render: (value, record) => renderDeleteButton(value, record),
+      fixed: 'right',
+      width: 100,
     },
   ];
 
@@ -180,6 +141,18 @@ function OrdersTable(props) {
     return <Button onClick={() => renderEditModal(value, record)}>Edit</Button>;
   };
 
+  const renderImageButton = (value, record) => {
+    const link = `https://miaexpress-images.s3.ap-southeast-1.amazonaws.com/${record.trackingNumber}.jpg`;
+    return (
+      <Button
+        disabled={record.isImageUploaded == undefined || !record.isImageUploaded}
+        onClick={() => window.open(link, '_blank')}
+      >
+        View Image
+      </Button>
+    );
+  };
+
   const renderSearchButton = (value, record) => {
     return (
       <Button>
@@ -189,6 +162,51 @@ function OrdersTable(props) {
           Go To
         </Link>
       </Button>
+    );
+  };
+
+  const renderChangeZoneSelection = (value, record) => {
+    const zone = zoneListMemo.find(zone => zone.id === record.zoneId);
+    const isWarning = record.score <= 85;
+
+    const options = zoneListMemo.map(zone => {
+      return {
+        value: zone.id,
+        label: zone.title,
+      };
+    });
+
+    const handleChangeZone = async e => {
+      await changeZoneIdInOrder(record.id, e);
+    };
+
+    const changeZoneIdInOrder = async (orderId, zoneId) => {
+      const res = await Promise.resolve(putOrdersWithZoneIdAPI({ id: orderId, zoneId }));
+      if (res.status == 201) {
+        const updatedOrderList = ordersList.map(order => {
+          if (order.id === orderId) {
+            return res.data;
+          } else {
+            return order;
+          }
+        });
+        setOrdersList(updatedOrderList);
+      }
+    };
+
+    return (
+      <Select
+        // showSearch
+        disabled={zone === undefined}
+        style={{ width: 150 }}
+        // filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        style={{ color: !isWarning ? 'green' : 'red' }}
+        value={zone?.title || 'NOT FOUND'}
+        options={options}
+        // onSearch={onSearch}
+        // optionFilterProp="children"
+        onChange={handleChangeZone}
+      />
     );
   };
 
@@ -204,10 +222,6 @@ function OrdersTable(props) {
         <Button disabled={props.user.permissions !== Admin}>Delete</Button>
       </Popconfirm>
     );
-  };
-
-  const onPageChange = (page, pageSize) => {
-    console.log('change page');
   };
 
   const handleDelete = id => {
@@ -234,14 +248,31 @@ function OrdersTable(props) {
     props.onChangeAddress(record.address);
     props.onChangeWeight(record.weight);
     props.onChangeValue(record.value);
+    props.onChangeLength(record.length);
+    props.onChangeHeight(record.height);
+    props.onChangeWidth(record.width);
     props.onChangeDescription(record.description);
     props.onChangeQuantity(record.quantity);
   };
 
+  React.useEffect(() => {
+    const getZones = async () => {
+      const res = await Promise.resolve(getZonesAPI());
+      if (res.status == 200) {
+        setZonesList(res.data);
+      }
+    };
+    getZones();
+  }, []);
+
+  React.useEffect(() => {
+    setOrdersList(props.ordersList);
+  }, [props.ordersList]);
+
   /* ------------------ */
   /* -     Render     - */
   /* ------------------ */
-  return <Table dataSource={props.ordersList} columns={columns} style={{ width: '120vw' }} loading={props.isLoading} />;
+  return <Table dataSource={ordersList} columns={columns} loading={props.isLoading} scroll={{ x: 1300 }} />;
 }
 
 OrdersTable.propTypes = {
@@ -266,6 +297,9 @@ OrdersTable.propTypes = {
   onChangeAddress: PropTypes.func,
   onChangeWeight: PropTypes.func,
   onChangeValue: PropTypes.func,
+  onChangeLength: PropTypes.func,
+  onChangeHeight: PropTypes.func,
+  onChangeWidth: PropTypes.func,
   onChangeDescription: PropTypes.func,
   onChangeQuantity: PropTypes.func,
   setModifyingId: PropTypes.func,
@@ -297,6 +331,9 @@ const mapDispatchToProps = dispatch => ({
   onChangeComuna: e => dispatch(onChangeComunaAction(e)),
   onChangeAddress: e => dispatch(onChangeAddressAction(e)),
   onChangeWeight: e => dispatch(onChangeWeightAction(e)),
+  onChangeHeight: e => dispatch(onChangeHeightAction(e)),
+  onChangeLength: e => dispatch(onChangeLengthAction(e)),
+  onChangeWidth: e => dispatch(onChangeWidthAction(e)),
   onChangeValue: e => dispatch(onChangeValueAction(e)),
   onChangeDescription: e => dispatch(onChangeDescriptionAction(e)),
   onChangeQuantity: e => dispatch(onChangeQuantityAction(e)),

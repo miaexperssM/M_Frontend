@@ -13,6 +13,8 @@ import {
   getOrdersAction,
   modifyOrdersSuccess,
   modifyOrdersFailure,
+  modifyOrdersWithZoneIdSuccess,
+  modifyOrdersWithZoneIdFailure,
   trackOrdersFailure,
   trackOrdersSuccess,
   trackOrderListFailure,
@@ -36,6 +38,7 @@ import {
   postOrdersAPI,
   putOrdersAPI,
   delOrdersAPI,
+  putOrdersWithZoneIdAPI,
 } from './orders.api';
 import {
   makeSelectMAWB,
@@ -58,6 +61,9 @@ import {
   makeSelectDescription,
   makeSelectQuantity,
   makeSelectOrdersById,
+  makeSelectWidth,
+  makeSelectHeight,
+  makeSelectLength,
 } from './orders.selectors';
 
 export function* getOrdersSaga({ payload: { offset, limit } }) {
@@ -185,6 +191,9 @@ export function* putOrdersSaga({ payload: id }) {
   const comuna = yield select(makeSelectComuna);
   const address = yield select(makeSelectAddress);
   const weight = yield select(makeSelectWeight);
+  const height = yield select(makeSelectHeight);
+  const length = yield select(makeSelectLength);
+  const width = yield select(makeSelectWidth);
   const value = yield select(makeSelectValue);
   const description = yield select(makeSelectDescription);
   const quantity = yield select(makeSelectQuantity);
@@ -208,6 +217,9 @@ export function* putOrdersSaga({ payload: id }) {
       comuna,
       address,
       weight,
+      height,
+      length,
+      width,
       value,
       description,
       quantity,
@@ -216,6 +228,15 @@ export function* putOrdersSaga({ payload: id }) {
     yield put(getOrdersAction());
   } catch (error) {
     yield put(modifyOrdersFailure(error));
+  }
+}
+
+export function* putOrdersWithZoneIdSaga({ payload: { id, zoneId } }) {
+  try {
+    yield call(putOrdersWithZoneIdAPI, { id, zoneId });
+    yield put(modifyOrdersWithZoneIdSuccess());
+  } catch (error) {
+    yield put(modifyOrdersWithZoneIdFailure(error));
   }
 }
 

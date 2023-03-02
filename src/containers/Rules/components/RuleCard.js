@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Button, Popconfirm, Space } from 'antd';
+import { Card, Button, Popconfirm, Divider, List } from 'antd';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 export default function RuleCard(props) {
   const [top, setTop] = useState(0);
@@ -26,7 +27,7 @@ export default function RuleCard(props) {
     <Card
       size="small"
       title={`Port ${props.position.id}`}
-      style={{ position: 'absolute', top: top, left: left, width: 120, fontSize: 10 }}
+      style={{ position: 'absolute', top: top, left: left, width: 150, fontSize: 10, maxHeight: 300 }}
       extra={
         <Button
           style={{
@@ -47,32 +48,46 @@ export default function RuleCard(props) {
         </Button>
       }
     >
-      <Space direction="vertical">
-        {props.rulesList
-          .filter(rule => rule.port == props.position.id)
-          .map(rule => {
-            return (
-              <Popconfirm
-                key={rule.id}
-                title={`Operation ${
-                  rule.zoneId == -1
-                    ? rule.comunaName
-                    : props.zoneList?.find(zone => zone.id == rule.zoneId)?.title || ''
-                }`}
-                okText="Delete"
-                cancelText="Edit"
-                onConfirm={() => onDelete(rule)}
-                onCancel={() => onEdit(rule)}
-              >
-                <a href="#">
-                  {rule.zoneId == -1
-                    ? rule.comunaName
-                    : props.zoneList?.find(zone => zone.id == rule.zoneId)?.title || ''}
-                </a>
-              </Popconfirm>
-            );
-          })}
-      </Space>
+      <div
+        id="scrollableDiv"
+        style={{
+          maxHeight: 230,
+          overflow: 'auto',
+          padding: '0',
+        }}
+      >
+        <InfiniteScroll
+          dataLength={props.rulesList.filter(rule => rule.port == props.position.id).length}
+          scrollableTarget="scrollableDiv"
+        >
+          <List
+            locale={{ emptyText: 'No Data' }}
+            dataSource={props.rulesList.filter(rule => rule.port == props.position.id)}
+            renderItem={rule => (
+              <List.Item key={rule.id}>
+                <Popconfirm
+                  key={rule.id}
+                  title={`Operation ${
+                    rule.zoneId == -1
+                      ? rule.comunaName
+                      : props.zoneList?.find(zone => zone.id == rule.zoneId)?.title || ''
+                  }`}
+                  okText="Delete"
+                  cancelText="Edit"
+                  onConfirm={() => onDelete(rule)}
+                  onCancel={() => onEdit(rule)}
+                >
+                  <a href="#">
+                    {rule.zoneId == -1
+                      ? rule.comunaName
+                      : props.zoneList?.find(zone => zone.id == rule.zoneId)?.title || ''}
+                  </a>
+                </Popconfirm>
+              </List.Item>
+            )}
+          />
+        </InfiniteScroll>
+      </div>
     </Card>
   );
 }

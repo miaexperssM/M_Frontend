@@ -24,9 +24,12 @@ import {
   makeSelectComuna,
   makeSelectAddress,
   makeSelectWeight,
+  makeSelectHeight,
+  makeSelectLength,
   makeSelectValue,
   makeSelectDescription,
   makeSelectQuantity,
+  makeSelectWidth,
 } from '../orders.selectors';
 import {
   handleModifyOrderModalCancelAction,
@@ -46,10 +49,13 @@ import {
   onChangeComunaAction,
   onChangeAddressAction,
   onChangeWeightAction,
+  onChangeHeightAction,
+  onChangeLengthAction,
   onChangeValueAction,
   onChangeDescriptionAction,
   onChangeQuantityAction,
   modifyOrdersAction,
+  onChangeWidthAction,
 } from '../orders.actions';
 
 function ModifyOrderModal(props) {
@@ -119,6 +125,18 @@ function ModifyOrderModal(props) {
         <Input placeholder="Detail Address" onChange={props.onChangeAddress} value={props.address} />
       </div>
       <div style={{ marginBottom: 10 }}>
+        <Tag>Height</Tag>
+        <InputNumber onChange={props.onChangeHeight} value={props.height} />
+      </div>
+      <div style={{ marginBottom: 10 }}>
+        <Tag>Length</Tag>
+        <InputNumber onChange={props.onChangeLength} value={props.length} />
+      </div>
+      <div style={{ marginBottom: 10 }}>
+        <Tag>Width</Tag>
+        <InputNumber onChange={props.onChangeWidth} value={props.width} />
+      </div>
+      <div style={{ marginBottom: 10 }}>
         <Tag>Weight</Tag>
         <InputNumber onChange={props.onChangeWeight} value={props.weight} />
       </div>
@@ -178,6 +196,9 @@ ModifyOrderModal.propTypes = {
   onChangeComuna: PropTypes.func,
   onChangeAddress: PropTypes.func,
   onChangeWeight: PropTypes.func,
+  onChangeHeight: PropTypes.func,
+  onChangeLength: PropTypes.func,
+  onChangeWidth: PropTypes.func,
   onChangeValue: PropTypes.func,
   onChangeDescription: PropTypes.func,
   onChangeQuantity: PropTypes.func,
@@ -205,6 +226,9 @@ const mapStateToProps = createStructuredSelector({
   description: makeSelectDescription,
   quantity: makeSelectQuantity,
   weight: makeSelectWeight,
+  height: makeSelectHeight,
+  length: makeSelectLength,
+  width: makeSelectWidth,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -226,6 +250,9 @@ const mapDispatchToProps = dispatch => ({
   onChangeComuna: e => dispatch(onChangeComunaAction(e.target.value)),
   onChangeAddress: e => dispatch(onChangeAddressAction(e.target.value)),
   onChangeWeight: e => dispatch(onChangeWeightAction(e)),
+  onChangeHeight: e => dispatch(onChangeHeightAction(e)),
+  onChangeLength: e => dispatch(onChangeLengthAction(e)),
+  onChangeWidth: e => dispatch(onChangeWidthAction(e)),
   onChangeValue: e => dispatch(onChangeValueAction(e)),
   onChangeDescription: e => dispatch(onChangeDescriptionAction(e.target.value)),
   onChangeQuantity: e => dispatch(onChangeQuantityAction(e)),

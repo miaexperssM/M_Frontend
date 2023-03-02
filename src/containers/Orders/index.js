@@ -100,6 +100,7 @@ function Orders(props) {
   const [tabsKey, setTabsKey] = React.useState('1');
   const [destinationAddress, setDestinationAddress] = React.useState('');
   const [orderDescription, setOrderDescription] = React.useState('');
+  const [isOrderZoneSelectionByManual, setIsOrderZoneSelectionByManual] = React.useState(undefined);
   const [orderPlaceId, setOrderPlaceId] = React.useState('');
   const [orderLngLat, setOrderLngLat] = React.useState();
   const [modifyingId, setModifyingId] = React.useState(0);
@@ -154,6 +155,7 @@ function Orders(props) {
         `${record.address}, ${record.comuna}, ${record.province}, ${record.region}, ${record.destinationCountry}`,
       );
       setOrderDescription(record.description);
+      setIsOrderZoneSelectionByManual(record.isManualZoneSelection);
       setInputTrackingNumber('');
       setOrderPlaceId(record.placeIdInGoogle);
       if (record.location) {
@@ -265,6 +267,20 @@ function Orders(props) {
             </Col>
             <Col span={16}>
               <p>{orderDescription}</p>
+            </Col>
+          </Row>
+          <Row style={{ marginTop: '20px' }}>
+            <Col span={8}>
+              <p>Order's Zone Selection Mode</p>
+            </Col>
+            <Col span={16} style={{ color: isOrderZoneSelectionByManual === true ? 'green' : 'black' }}>
+              <p>
+                {isOrderZoneSelectionByManual === undefined
+                  ? 'Unknown Source'
+                  : isOrderZoneSelectionByManual == false
+                  ? 'System Auto Mapping'
+                  : 'Manually Setting'}
+              </p>
             </Col>
           </Row>
           <Row>

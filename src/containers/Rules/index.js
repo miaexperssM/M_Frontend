@@ -46,7 +46,7 @@ function Rules(props) {
         <h1 style={{ fontSize: 'x-large' }}> Picking Rules List </h1>
       </div>
       <Tabs activeKey={tabsKey} onTabClick={setTabsKey}>
-        <TabPane tab="Level 1" key="1" style={{ width: 1200, height: 800 }}>
+        <TabPane tab="Level 1" key="1" style={{ width: 1500, height: 1000 }}>
           <Level_1_RuleChart
             rulesList={levelRules}
             getRules={props.getRules}
@@ -55,7 +55,7 @@ function Rules(props) {
             modifyRules={props.modifyRules}
           />
         </TabPane>
-        <TabPane tab="Level 2" key="2" style={{ width: 1200, height: 800 }}>
+        <TabPane tab="Level 2" key="2" style={{ width: 1500, height: 1000 }}>
           <Level_3_RuleChart
             rulesList={levelRules}
             getRules={props.getRules}

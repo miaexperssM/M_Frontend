@@ -3,14 +3,25 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { Table, Button, Input, Tag, Icon } from 'antd';
+import { Table, Button, Input, Tag, Icon, Select } from 'antd';
 import { selectOrdersList, selectAddOrderFailList, selectAddOrderSuccessList } from '../orders.selectors';
+import { modifyOrdersWithZoneIdAction } from '../orders.actions';
 import { makeSelectUser } from 'global.selectors';
 import { Link } from 'react-router-dom';
 import 'App.css';
+import { getZonesAPI } from 'containers/Zones/zones.api';
+import { putOrdersWithZoneIdAPI } from '../orders.api';
 
 function UploadOrdersTable(props) {
   const [ordersList, setOrdersList] = React.useState([]);
+  const [zonesList, setZonesList] = React.useState([]);
+  const [zoneSearchValue, setZoneSearchValue] = React.useState(undefined);
+  const zoneListMemo = React.useMemo(() => {
+    const list = zonesList.map(zone => {
+      return { id: zone.id, title: zone.title };
+    });
+    return list;
+  }, [zonesList]);
 
   /* ------------------ */
   /* -     Const     - */
@@ -32,28 +43,26 @@ function UploadOrdersTable(props) {
       dataIndex: 'trackingNumber',
       key: 'trackingNumber',
     },
-    { title: 'Shipper', dataIndex: 'shipper', key: 'shipper' },
     {
-      title: 'Shipper Phone Num ',
-      dataIndex: 'shipperPhoneNumber',
-      key: 'shipperPhoneNumber',
+      title: 'Localization Accuracy',
+      dataIndex: 'score',
+      key: 'score',
+      render: (value, record) => renderAccuracyTag(value, record),
+    },
+    {
+      title: 'Zone',
+      dataIndex: 'zoneId',
+      key: 'changeZoneId',
+      render: (value, record) => renderChangeZoneSelection(value, record),
+      width: 150,
+    },
+    {
+      title: 'Search',
+      dataIndex: 'search',
+      key: 'search',
+      render: (value, record) => renderSearchButton(value, record),
     },
     { title: 'Destination Country', dataIndex: 'destinationCountry', key: 'destinationCountry' },
-    {
-      title: 'Recipient',
-      dataIndex: 'recipient',
-      key: 'recipient',
-    },
-    {
-      title: 'Recipient Phone Num',
-      dataIndex: 'recipientPhoneNumber',
-      key: 'recipientPhoneNumber',
-    },
-    {
-      title: 'Recipient Email',
-      dataIndex: 'recipientEmail',
-      key: 'recipientEmail',
-    },
     {
       title: 'Region',
       dataIndex: 'region',
@@ -74,12 +83,6 @@ function UploadOrdersTable(props) {
       dataIndex: 'address',
       key: 'address',
     },
-    {
-      title: 'Search',
-      dataIndex: 'search',
-      key: 'search',
-      render: (value, record) => renderSearchButton(value, record),
-    },
   ];
 
   /* ------------------ */
@@ -91,9 +94,62 @@ function UploadOrdersTable(props) {
     return <Tag color={isSuccess ? 'green' : 'red'}>{isSuccess ? 'Success' : 'Failed'}</Tag>;
   };
 
+  const renderAccuracyTag = (value, record) => {
+    const isWarning = record.score <= 85;
+    const accuracy = record.score ? record.score.toFixed(2) : 0;
+    return <Tag color={!isWarning ? 'green' : 'red'}>{accuracy}</Tag>;
+  };
+
+  const changeZoneIdInOrder = async (orderId, zoneId) => {
+    const res = await Promise.resolve(putOrdersWithZoneIdAPI({ id: orderId, zoneId }));
+    if (res.status == 201) {
+      const updatedOrderList = ordersList.map(order => {
+        if (order.id === orderId) {
+          return res.data;
+        } else {
+          return order;
+        }
+      });
+      setOrdersList(updatedOrderList);
+    }
+  };
+
+  const renderChangeZoneSelection = (value, record) => {
+    const zone = zoneListMemo.find(zone => zone.id === record.zoneId);
+    const isWarning = record.score <= 85;
+
+    const options = zoneListMemo.map(zone => {
+      return {
+        value: zone.id,
+        label: zone.title,
+      };
+    });
+
+    const handleChangeZone = async e => {
+      console.log(e);
+      await changeZoneIdInOrder(record.id, e);
+      setZoneSearchValue(undefined);
+    };
+
+    return (
+      <Select
+        // showSearch
+        disabled={zone === undefined}
+        style={{ width: 300 }}
+        // filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        style={{ color: !isWarning ? 'green' : 'red' }}
+        value={zone?.title || 'NOT FOUND'}
+        options={options}
+        // onSearch={onSearch}
+        // optionFilterProp="children"
+        onChange={handleChangeZone}
+      />
+    );
+  };
+
   const filterResult = (value, record) => {
     const isSuccess = props.addOrderSuccessList?.some(order => order.trackingNumber == record.trackingNumber);
-    const result = isSuccess ? 'Success' : 'Failed';
+    const result = isSuccess ? (record.score > 85 ? 'Success' : 'Warning') : 'Failed';
     return result === value;
   };
 
@@ -112,6 +168,16 @@ function UploadOrdersTable(props) {
   React.useEffect(() => {
     setOrdersList(props.addOrderFailList.concat(props.addOrderSuccessList));
   }, [props.addOrderFailList, props.addOrderSuccessList]);
+
+  React.useEffect(() => {
+    const getZones = async () => {
+      const res = await Promise.resolve(getZonesAPI());
+      if (res.status == 200) {
+        setZonesList(res.data);
+      }
+    };
+    getZones();
+  }, []);
   /* ------------------ */
   /* -     Render     - */
   /* ------------------ */
@@ -119,7 +185,7 @@ function UploadOrdersTable(props) {
     <Table
       dataSource={ordersList}
       columns={columns}
-      style={{ width: '120vw' }}
+      style={{ width: '100vw' }}
       rowClassName={(record, index) =>
         props.addOrderSuccessList?.some(order => order.trackingNumber == record.trackingNumber)
           ? 'table-row-light'
@@ -133,6 +199,7 @@ UploadOrdersTable.propTypes = {
   ordersList: PropTypes.array,
   addOrderFailList: PropTypes.array,
   addOrderSuccessList: PropTypes.array,
+  modifyOrdersWithZoneId: PropTypes.func,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -142,6 +209,10 @@ const mapStateToProps = createStructuredSelector({
   user: makeSelectUser(),
 });
 
-const withConnect = connect(mapStateToProps);
+const mapDispatchToProps = dispatch => ({
+  modifyOrdersWithZoneId: ({ id, zoneId }) => dispatch(modifyOrdersWithZoneIdAction({ id, zoneId })),
+});
+
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 export default compose(withConnect)(UploadOrdersTable);

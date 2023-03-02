@@ -26,6 +26,10 @@ export function putOrdersAPI(payload) {
   return request.put(`v1/orders/${payload.id}`, payload);
 }
 
+export function putOrdersWithZoneIdAPI(payload) {
+  return request.put(`v1/ordersWithZoneId/${payload.id}`, { zoneId: payload.zoneId });
+}
+
 export function delOrdersAPI(payload) {
   return request.delete(`v1/orders/${payload.id}`);
 }

@@ -10,6 +10,9 @@ import {
   MODIFY_ORDER_REQUEST,
   MODIFY_ORDER_SUCCESS,
   MODIFY_ORDER_FAILURE,
+  MODIFY_ORDER_WITH_ZONEID_REQUEST,
+  MODIFY_ORDER_WITH_ZONEID_SUCCESS,
+  MODIFY_ORDER_WITH_ZONEID_FAILURE,
   HANDLE_ADD_ORDER_MODAL_SHOW,
   HANDLE_ADD_ORDER_MODAL_CANCEL,
   HANDLE_MODIFY_ORDER_MODAL_SHOW,
@@ -30,6 +33,9 @@ import {
   ON_CHANGE_COMUNA,
   ON_CHANGE_ADDRESS,
   ON_CHANGE_WEIGHT,
+  ON_CHANGE_HEIGHT,
+  ON_CHANGE_LENGTH,
+  ON_CHANGE_WIDTH,
   ON_CHANGE_VALUE,
   ON_CHANGE_DESCRIPTION,
   ON_CHANGE_QUANTITY,
@@ -78,6 +84,9 @@ export const initialState = {
     comuna: '',
     address: '',
     weight: 0,
+    length: 0,
+    height: 0,
+    width: 0,
     value: 0,
     description: '',
     quantity: 0,
@@ -99,7 +108,6 @@ const ordersReducer = (state = initialState, action) =>
         draft.ordersList = [];
         draft.isLoading = false;
         break;
-
       case GET_ORDERS_UPDATED_AT_REQUEST:
         draft.isLoading = true;
         break;
@@ -179,10 +187,31 @@ const ordersReducer = (state = initialState, action) =>
         draft.modifyOrderModalLoading = false;
         draft.modifyOrderModalVisible = false;
         draft.orderForm = initialState.orderForm;
+        draft.ordersList.map(order => {
+          if (order.id === action.payload.id) {
+            return action.payload.data;
+          } else return order;
+        });
         break;
       case MODIFY_ORDER_FAILURE:
         draft.modifyOrderModalLoading = false;
-
+        break;
+      case MODIFY_ORDER_WITH_ZONEID_REQUEST:
+        draft.modifyOrderModalLoading = true;
+        break;
+      case MODIFY_ORDER_WITH_ZONEID_SUCCESS:
+        draft.modifyOrderModalLoading = false;
+        draft.modifyOrderModalVisible = false;
+        draft.orderForm = initialState.orderForm;
+        draft.ordersList.map(order => {
+          if (order.id === action.payload.id) {
+            return action.payload.data;
+          } else return order;
+        });
+        break;
+      case MODIFY_ORDER_WITH_ZONEID_FAILURE:
+        draft.modifyOrderModalLoading = false;
+        break;
       case HANDLE_ADD_ORDER_MODAL_SHOW:
         draft.addOrderModalVisible = true;
         break;
@@ -191,7 +220,6 @@ const ordersReducer = (state = initialState, action) =>
         draft.addOrderModalVisible = false;
         draft.orderForm = initialState.orderForm;
         break;
-
       case HANDLE_MODIFY_ORDER_MODAL_SHOW:
         draft.modifyOrderModalVisible = true;
         break;
@@ -252,6 +280,15 @@ const ordersReducer = (state = initialState, action) =>
         break;
       case ON_CHANGE_WEIGHT:
         draft.orderForm.weight = action.payload;
+        break;
+      case ON_CHANGE_HEIGHT:
+        draft.orderForm.height = action.payload;
+        break;
+      case ON_CHANGE_LENGTH:
+        draft.orderForm.length = action.payload;
+        break;
+      case ON_CHANGE_WIDTH:
+        draft.orderForm.width = action.payload;
         break;
       case ON_CHANGE_VALUE:
         draft.orderForm.value = action.payload;
