@@ -200,7 +200,6 @@ function OrdersTable(props) {
       <Select
         showSearch
         className="select-in-table"
-        disabled={!props.addOrderSuccessList?.some(order => order.trackingNumber == record.trackingNumber)}
         filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         filterSort={(optionA, optionB) =>
           (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
