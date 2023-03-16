@@ -193,18 +193,23 @@ function OrdersTable(props) {
         setOrdersList(updatedOrderList);
       }
     };
-
+    const onSearch = e => {
+      console.log(e);
+    };
     return (
       <Select
-        // showSearch
-        disabled={zone === undefined}
-        style={{ width: 150 }}
-        // filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        showSearch
+        className="select-in-table"
+        disabled={!props.addOrderSuccessList?.some(order => order.trackingNumber == record.trackingNumber)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+        filterSort={(optionA, optionB) =>
+          (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+        }
         style={{ color: !isWarning ? 'green' : 'red' }}
-        value={zone?.title || 'NOT FOUND'}
+        placeholder={zone?.title.padEnd('15') || `NOT FOUND`}
         options={options}
-        // onSearch={onSearch}
-        // optionFilterProp="children"
+        onSearch={onSearch}
+        optionFilterProp="children"
         onChange={handleChangeZone}
       />
     );

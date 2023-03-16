@@ -15,7 +15,6 @@ import { putOrdersWithZoneIdAPI } from '../orders.api';
 function UploadOrdersTable(props) {
   const [ordersList, setOrdersList] = React.useState([]);
   const [zonesList, setZonesList] = React.useState([]);
-  const [zoneSearchValue, setZoneSearchValue] = React.useState(undefined);
   const zoneListMemo = React.useMemo(() => {
     const list = zonesList.map(zone => {
       return { id: zone.id, title: zone.title };
@@ -54,7 +53,7 @@ function UploadOrdersTable(props) {
       dataIndex: 'zoneId',
       key: 'changeZoneId',
       render: (value, record) => renderChangeZoneSelection(value, record),
-      width: 150,
+      width: 300,
     },
     {
       title: 'Search',
@@ -126,22 +125,31 @@ function UploadOrdersTable(props) {
     });
 
     const handleChangeZone = async e => {
+      if (e !== 'NOT FOUND') {
+        await changeZoneIdInOrder(record.id, e);
+      } else {
+        await changeZoneIdInOrder(record.id, undefined);
+      }
+    };
+
+    const onSearch = e => {
       console.log(e);
-      await changeZoneIdInOrder(record.id, e);
-      setZoneSearchValue(undefined);
     };
 
     return (
       <Select
-        // showSearch
-        disabled={zone === undefined}
-        style={{ width: 300 }}
-        // filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        showSearch
+        className="select-in-table"
+        disabled={!props.addOrderSuccessList?.some(order => order.trackingNumber == record.trackingNumber)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+        filterSort={(optionA, optionB) =>
+          (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+        }
         style={{ color: !isWarning ? 'green' : 'red' }}
-        value={zone?.title || 'NOT FOUND'}
+        placeholder={zone?.title.padEnd('15') || `NOT FOUND`}
         options={options}
-        // onSearch={onSearch}
-        // optionFilterProp="children"
+        onSearch={onSearch}
+        optionFilterProp="children"
         onChange={handleChangeZone}
       />
     );
