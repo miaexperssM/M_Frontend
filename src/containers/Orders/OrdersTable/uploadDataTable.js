@@ -117,12 +117,23 @@ function UploadOrdersTable(props) {
     const zone = zoneListMemo.find(zone => zone.id === record.zoneId);
     const isWarning = record.score <= 85;
 
-    const options = zoneListMemo.map(zone => {
+    const zoneOptions = zoneListMemo.map(zone => {
       return {
         value: zone.id,
         label: zone.title,
       };
     });
+
+    const options = zoneOptions.concat([
+      {
+        value: 0,
+        label: 'Set to UnKnown',
+      },
+      {
+        value: -1,
+        label: 'Reset by Map',
+      },
+    ]);
 
     const handleChangeZone = async e => {
       if (e !== 'NOT FOUND') {
@@ -147,6 +158,7 @@ function UploadOrdersTable(props) {
         }
         style={{ color: !isWarning ? 'green' : 'red' }}
         placeholder={zone?.title.padEnd('15') || `NOT FOUND`}
+        value={zone?.id}
         options={options}
         onSearch={onSearch}
         optionFilterProp="children"

@@ -120,3 +120,11 @@
   6. App backend API to receive the orders uploading
   7. Device captured image could be shown in data loading table
   8. Rules table page refinement to avoid cannot show or edit
+
+## v2.5.2
+
+- RelaseDate: 2023.05.07
+- Improvement:
+  1. Able to set order's zoneId to UnKnown
+  2. Able to set order's zoneId to Remap
+  3. Add historical order as ref to map new order
